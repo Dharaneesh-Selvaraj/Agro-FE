@@ -12,7 +12,6 @@ export default function AdminPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    price: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -38,7 +37,7 @@ export default function AdminPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price) return;
+    if (!formData.name) return;
     
     setIsUploading(true);
     let uploadedImageUrl = "";
@@ -63,11 +62,10 @@ export default function AdminPage() {
 
       addFertilizer({ 
         ...formData, 
-        price: parseFloat(formData.price),
         image: uploadedImageUrl 
       });
       
-      setFormData({ name: "", description: "", price: "" });
+      setFormData({ name: "", description: "" });
       setImageFile(null);
       
       // Reset the file input element manually
@@ -116,18 +114,6 @@ export default function AdminPage() {
                   className="w-full px-5 py-3 rounded-2xl bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition font-medium text-green-950 dark:text-white resize-none"
                   required
                 ></textarea>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-green-900 dark:text-green-100 mb-2 ml-1">Price (₹)</label>
-                <input
-                  type="number"
-                  name="price"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={handleChange}
-                  className="w-full px-5 py-3 rounded-2xl bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition font-medium text-green-950 dark:text-white"
-                  required
-                />
               </div>
               
               {/* File Upload Area */}

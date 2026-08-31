@@ -1,186 +1,163 @@
 [
-  {
-    "id": 1,
-    "name": "Coco-Boost Organic Blend",
-    "description": "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_10_2026-08-12_13-32-20.jpg",
-    "price": 19.84,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 2,
-    "name": "Nitrogen Max Yield",
-    "description": "Rich in essential nutrients for robust root development and strong trunk formation.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_11_2026-08-12_13-32-20.jpg",
-    "price": 29.51,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 3,
-    "name": "Phosphorus Root Builder",
-    "description": "A 100% organic blend designed to retain moisture and improve soil aeration.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_12_2026-08-12_13-32-20.jpg",
-    "price": 62.46,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 4,
-    "name": "Green Leaf Liquid Feed",
-    "description": "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_13_2026-08-12_13-32-20.jpg",
-    "price": 38.33,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 5,
-    "name": "Potassium Plus Granules",
-    "description": "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_14_2026-08-12_13-32-20.jpg",
-    "price": 41.03,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 6,
-    "name": "Eco-Friendly Soil Conditioner",
-    "description": "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_15_2026-08-12_13-32-20.jpg",
-    "price": 76.56,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 7,
-    "name": "Coconut Palm Special",
-    "description": "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_16_2026-08-12_13-32-20.jpg",
-    "price": 58.7,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 8,
-    "name": "Premium NPK 20-20-20",
-    "description": "Rich in essential nutrients for robust root development and strong trunk formation.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_17_2026-08-12_13-32-20.jpg",
-    "price": 41.54,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 9,
-    "name": "Organic Seaweed Extract",
-    "description": "A 100% organic blend designed to retain moisture and improve soil aeration.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_18_2026-08-12_13-32-20.jpg",
-    "price": 66.31,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 10,
-    "name": "Calcium Nitrate Supplement",
-    "description": "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_19_2026-08-12_13-32-20.jpg",
-    "price": 42.58,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 11,
-    "name": "Coco-Boost Organic Blend (Batch 2)",
-    "description": "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_1_2026-08-12_13-32-20.jpg",
-    "price": 18.86,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 12,
-    "name": "Nitrogen Max Yield (Batch 2)",
-    "description": "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-30-55.jpg",
-    "price": 18.29,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 13,
-    "name": "Phosphorus Root Builder (Batch 2)",
-    "description": "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-03.jpg",
-    "price": 56.08,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 14,
-    "name": "Green Leaf Liquid Feed (Batch 2)",
-    "description": "Rich in essential nutrients for robust root development and strong trunk formation.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-06.jpg",
-    "price": 41.38,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 15,
-    "name": "Potassium Plus Granules (Batch 2)",
-    "description": "A 100% organic blend designed to retain moisture and improve soil aeration.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-09.jpg",
-    "price": 30.34,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 16,
-    "name": "Eco-Friendly Soil Conditioner (Batch 2)",
-    "description": "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_2_2026-08-12_13-32-20.jpg",
-    "price": 46.71,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 17,
-    "name": "Coconut Palm Special (Batch 2)",
-    "description": "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_3_2026-08-12_13-32-20.jpg",
-    "price": 28.47,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 18,
-    "name": "Premium NPK 20-20-20 (Batch 2)",
-    "description": "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_4_2026-08-12_13-32-20.jpg",
-    "price": 16.45,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 19,
-    "name": "Organic Seaweed Extract (Batch 2)",
-    "description": "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_5_2026-08-12_13-32-20.jpg",
-    "price": 41.47,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 20,
-    "name": "Calcium Nitrate Supplement (Batch 2)",
-    "description": "Rich in essential nutrients for robust root development and strong trunk formation.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_6_2026-08-12_13-32-20.jpg",
-    "price": 49,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 21,
-    "name": "Coco-Boost Organic Blend (Batch 3)",
-    "description": "A 100% organic blend designed to retain moisture and improve soil aeration.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_7_2026-08-12_13-32-20.jpg",
-    "price": 83.88,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 22,
-    "name": "Nitrogen Max Yield (Batch 3)",
-    "description": "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_8_2026-08-12_13-32-20.jpg",
-    "price": 45.79,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  },
-  {
-    "id": 23,
-    "name": "Phosphorus Root Builder (Batch 3)",
-    "description": "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-    "image": "/AppImages/Warhouse/Warhouse/photo_9_2026-08-12_13-32-20.jpg",
-    "price": 79.54,
-    "dateAdded": "2026-08-18T05:11:00.074Z"
-  }
+    {
+        "id":  1,
+        "name":  "Coco-Boost Organic Blend",
+        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_10_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  2,
+        "name":  "Nitrogen Max Yield",
+        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_11_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  3,
+        "name":  "Phosphorus Root Builder",
+        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_12_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  4,
+        "name":  "Green Leaf Liquid Feed",
+        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_13_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  5,
+        "name":  "Potassium Plus Granules",
+        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_14_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  6,
+        "name":  "Eco-Friendly Soil Conditioner",
+        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_15_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  7,
+        "name":  "Coconut Palm Special",
+        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_16_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  8,
+        "name":  "Premium NPK 20-20-20",
+        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_17_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  9,
+        "name":  "Organic Seaweed Extract",
+        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_18_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  10,
+        "name":  "Calcium Nitrate Supplement",
+        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_19_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  11,
+        "name":  "Coco-Boost Organic Blend (Batch 2)",
+        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_1_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  12,
+        "name":  "Nitrogen Max Yield (Batch 2)",
+        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-30-55.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  13,
+        "name":  "Phosphorus Root Builder (Batch 2)",
+        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-03.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  14,
+        "name":  "Green Leaf Liquid Feed (Batch 2)",
+        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-06.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  15,
+        "name":  "Potassium Plus Granules (Batch 2)",
+        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-09.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  16,
+        "name":  "Eco-Friendly Soil Conditioner (Batch 2)",
+        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_2_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  17,
+        "name":  "Coconut Palm Special (Batch 2)",
+        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_3_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  18,
+        "name":  "Premium NPK 20-20-20 (Batch 2)",
+        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_4_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  19,
+        "name":  "Organic Seaweed Extract (Batch 2)",
+        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_5_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  20,
+        "name":  "Calcium Nitrate Supplement (Batch 2)",
+        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_6_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  21,
+        "name":  "Coco-Boost Organic Blend (Batch 3)",
+        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_7_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  22,
+        "name":  "Nitrogen Max Yield (Batch 3)",
+        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_8_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    },
+    {
+        "id":  23,
+        "name":  "Phosphorus Root Builder (Batch 3)",
+        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
+        "image":  "/AppImages/Warhouse/Warhouse/photo_9_2026-08-12_13-32-20.jpg",
+        "dateAdded":  "2026-08-18T05:11:00.074Z"
+    }
 ]

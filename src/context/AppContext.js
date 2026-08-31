@@ -8,10 +8,23 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [fertilizers, setFertilizers] = useState([]);
+  const [theme, setTheme] = useState("dark"); // default dark
 
   useEffect(() => {
     const savedUser = localStorage.getItem("agro_user");
-    const savedFertilizers = localStorage.getItem("agro_fertilizers");
+    const savedFertilizers = localStorage.getItem("agro_fertilizers_v2");
+    const savedTheme = localStorage.getItem("agro_theme");
+
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    } else {
+      document.documentElement.classList.add("dark"); // default
+    }
 
     if (savedUser) setUser(JSON.parse(savedUser));
     if (savedFertilizers) {
@@ -26,6 +39,19 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const newTheme = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("agro_theme", newTheme);
+      if (newTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      return newTheme;
+    });
+  };
+
   // Save to localStorage whenever they change
   useEffect(() => {
     if (user !== null) {
@@ -37,7 +63,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     if (fertilizers.length > 0) {
-      localStorage.setItem("agro_fertilizers", JSON.stringify(fertilizers));
+      localStorage.setItem("agro_fertilizers_v2", JSON.stringify(fertilizers));
     }
   }, [fertilizers]);
 
@@ -61,7 +87,7 @@ export const AppProvider = ({ children }) => {
   }
 
   return (
-    <AppContext.Provider value={{ user, fertilizers, login, logout, addFertilizer, deleteFertilizer }}>
+    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, deleteFertilizer }}>
       {children}
     </AppContext.Provider>
   );

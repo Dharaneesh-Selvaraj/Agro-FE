@@ -23,12 +23,9 @@ export default function FertilizerCard({ fertilizer, isAdmin, onDelete }) {
       
       <div className="p-6 flex flex-col flex-grow bg-white/40 dark:bg-black/20">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="text-2xl font-bold text-green-950 dark:text-green-50 leading-tight">
+          <h3 className="text-2xl font-extrabold text-green-900 dark:text-green-50 tracking-tight flex-1 pr-4">
             {fertilizer.name}
           </h3>
-          <span className="bg-green-500 text-white text-sm px-4 py-1.5 rounded-full font-bold shadow-md">
-            ₹{parseFloat(fertilizer.price).toFixed(2)}
-          </span>
         </div>
         <p className="text-green-800/80 dark:text-green-200/80 flex-grow mb-6 font-medium leading-relaxed">
           {fertilizer.description}

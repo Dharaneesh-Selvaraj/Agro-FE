@@ -2,6 +2,7 @@ import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
+import Splash from "@/components/Splash";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
         className={`${outfit.variable} ${geistMono.variable} antialiased font-sans bg-green-50 dark:bg-green-950`}
       >
         <AppProvider>
+          <Splash />
           <Navbar />
           <main className="min-h-screen">
             {children}
