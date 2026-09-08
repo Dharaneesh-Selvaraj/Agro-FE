@@ -4,6 +4,7 @@ import ShopGallery from "@/components/ShopGallery";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import AwarenessSection from "@/components/AwarenessSection";
+import EffectsStory from "@/components/EffectsStory";
 
 export default function Home() {
   const { user } = useAppContext();
@@ -45,7 +46,7 @@ export default function Home() {
             {!user && (
               <div className="flex gap-6 justify-center">
                 <Link 
-                  href="/store" 
+                  href="/products" 
                   className="bg-green-500 hover:bg-green-400 text-green-950 text-lg font-extrabold py-4 px-10 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.4)] transition-all transform hover:scale-105"
                 >
                   Explore Catalog
@@ -82,6 +83,9 @@ export default function Home() {
 
       {/* Awareness Section (Interactive Flip Cards) */}
       <AwarenessSection />
+
+      {/* Cinematic GSAP Storytelling Gallery */}
+      <EffectsStory />
 
       {/* Content Section: Mission */}
       <section className="bg-green-100 dark:bg-green-950 py-24 my-10 relative overflow-hidden rounded-[4rem] mx-4 md:mx-auto max-w-[95%] transition-colors duration-500">

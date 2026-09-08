@@ -1,163 +1,167 @@
 [
-    {
-        "id":  1,
-        "name":  "Coco-Boost Organic Blend",
-        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_10_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  2,
-        "name":  "Nitrogen Max Yield",
-        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_11_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  3,
-        "name":  "Phosphorus Root Builder",
-        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_12_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  4,
-        "name":  "Green Leaf Liquid Feed",
-        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_13_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  5,
-        "name":  "Potassium Plus Granules",
-        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_14_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  6,
-        "name":  "Eco-Friendly Soil Conditioner",
-        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_15_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  7,
-        "name":  "Coconut Palm Special",
-        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_16_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  8,
-        "name":  "Premium NPK 20-20-20",
-        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_17_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  9,
-        "name":  "Organic Seaweed Extract",
-        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_18_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  10,
-        "name":  "Calcium Nitrate Supplement",
-        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_19_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  11,
-        "name":  "Coco-Boost Organic Blend (Batch 2)",
-        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_1_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  12,
-        "name":  "Nitrogen Max Yield (Batch 2)",
-        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-30-55.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  13,
-        "name":  "Phosphorus Root Builder (Batch 2)",
-        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-03.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  14,
-        "name":  "Green Leaf Liquid Feed (Batch 2)",
-        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-06.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  15,
-        "name":  "Potassium Plus Granules (Batch 2)",
-        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_2026-08-12_13-31-09.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  16,
-        "name":  "Eco-Friendly Soil Conditioner (Batch 2)",
-        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_2_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  17,
-        "name":  "Coconut Palm Special (Batch 2)",
-        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_3_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  18,
-        "name":  "Premium NPK 20-20-20 (Batch 2)",
-        "description":  "Slow-release pellets that feed your plants for up to 6 months without burning roots.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_4_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  19,
-        "name":  "Organic Seaweed Extract (Batch 2)",
-        "description":  "Specifically formulated to accelerate early growth in coconut palms and enhance yield.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_5_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  20,
-        "name":  "Calcium Nitrate Supplement (Batch 2)",
-        "description":  "Rich in essential nutrients for robust root development and strong trunk formation.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_6_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  21,
-        "name":  "Coco-Boost Organic Blend (Batch 3)",
-        "description":  "A 100% organic blend designed to retain moisture and improve soil aeration.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_7_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  22,
-        "name":  "Nitrogen Max Yield (Batch 3)",
-        "description":  "Quick-release formula for fast recovery from nutrient deficiency in tropical climates.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_8_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    },
-    {
-        "id":  23,
-        "name":  "Phosphorus Root Builder (Batch 3)",
-        "description":  "Provides a balanced mix of micro-nutrients essential for flowering and fruit setting.",
-        "image":  "/AppImages/Warhouse/Warhouse/photo_9_2026-08-12_13-32-20.jpg",
-        "dateAdded":  "2026-08-18T05:11:00.074Z"
-    }
+  {
+    "id": "f1",
+    "name": "10:26:26 Complex",
+    "price": 1450,
+    "description": "Standard NPK complex fertilizer providing essential nutrients for initial growth stages.",
+    "category": "Fertiliser",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.5,
+    "reviews": 12,
+    "tags": ["NPK", "Complex"]
+  },
+  {
+    "id": "f2",
+    "name": "DAP - Di-Ammonium Phosphate",
+    "price": 1350,
+    "description": "High phosphorus fertilizer crucial for strong root development and plant establishment.",
+    "category": "Fertiliser",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.8,
+    "reviews": 34,
+    "tags": ["Phosphorus", "Root Growth"]
+  },
+  {
+    "id": "f3",
+    "name": "MOP-IPL-RED",
+    "price": 1700,
+    "description": "Muriate of Potash providing essential potassium for crop yield and disease resistance.",
+    "category": "Fertiliser",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.6,
+    "reviews": 28,
+    "tags": ["Potash", "Yield"]
+  },
+  {
+    "id": "f4",
+    "name": "Urea (45 Kg)",
+    "price": 266,
+    "description": "High nitrogen fertilizer promoting rapid vegetative growth and deep green foliage.",
+    "category": "Fertiliser",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.9,
+    "reviews": 156,
+    "tags": ["Nitrogen", "Growth"]
+  },
+  {
+    "id": "gf1",
+    "name": "Magnesium Sulphate",
+    "price": 850,
+    "description": "Secondary nutrient fertilizer essential for chlorophyll synthesis and preventing yellowing.",
+    "category": "General Fertilizer",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.7,
+    "reviews": 45,
+    "tags": ["Magnesium", "Chlorophyll"]
+  },
+  {
+    "id": "gf2",
+    "name": "Micronol Coconut C-18",
+    "price": 2100,
+    "description": "Specialized micronutrient blend engineered specifically for the precise needs of coconut palms.",
+    "category": "General Fertilizer",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 5.0,
+    "reviews": 89,
+    "tags": ["Coconut", "Micronutrients"]
+  },
+  {
+    "id": "gf3",
+    "name": "Neem Cake",
+    "price": 1200,
+    "description": "Organic fertilizer that slowly releases nutrients while naturally repelling soil-borne pests.",
+    "category": "General Fertilizer",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.8,
+    "reviews": 112,
+    "tags": ["Organic", "Pest Control"]
+  },
+  {
+    "id": "wsf1",
+    "name": "00-52-34 Water Soluble",
+    "price": 3200,
+    "description": "Mono Potassium Phosphate. 100% water-soluble fertilizer for drip irrigation, perfect for flowering stage.",
+    "category": "Water Soluble Fertilizer",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.9,
+    "reviews": 67,
+    "tags": ["Drip Irrigation", "Flowering"]
+  },
+  {
+    "id": "wsf2",
+    "name": "Calcium Nitrate",
+    "price": 1600,
+    "description": "Highly soluble source of calcium and nitrogen for strong cell walls and fruit quality.",
+    "category": "Water Soluble Fertilizer",
+    "image": "/AppImages/Products/fert-bag.png",
+    "rating": 4.6,
+    "reviews": 41,
+    "tags": ["Calcium", "Fruit Quality"]
+  },
+  {
+    "id": "p1",
+    "name": "Chlorpyriphos 20% EC",
+    "price": 850,
+    "description": "Broad-spectrum organophosphate insecticide highly effective against soil and foliage pests.",
+    "category": "Pesticide",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.5,
+    "reviews": 78,
+    "tags": ["Insecticide", "Broad Spectrum"]
+  },
+  {
+    "id": "p2",
+    "name": "Fipronil 5% SC",
+    "price": 1250,
+    "description": "Systemic insecticide providing excellent control over complex pest populations including borers.",
+    "category": "Pesticide",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.8,
+    "reviews": 92,
+    "tags": ["Systemic", "Borers"]
+  },
+  {
+    "id": "p3",
+    "name": "Imidacloprid 30.5% SC",
+    "price": 1450,
+    "description": "Powerful neonicotinoid insecticide targeting sucking pests and protecting young shoots.",
+    "category": "Pesticide",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.7,
+    "reviews": 104,
+    "tags": ["Sucking Pests", "Systemic"]
+  },
+  {
+    "id": "w1",
+    "name": "Glyphosate 41% SL",
+    "price": 950,
+    "description": "Non-selective, systemic herbicide for complete elimination of deep-rooted perennial weeds.",
+    "category": "Weedicides",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.9,
+    "reviews": 210,
+    "tags": ["Herbicide", "Non-selective"]
+  },
+  {
+    "id": "w2",
+    "name": "Atrazine 50%",
+    "price": 680,
+    "description": "Selective herbicide used primarily for pre-emergence and post-emergence control of broadleaf weeds.",
+    "category": "Weedicides",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.4,
+    "reviews": 56,
+    "tags": ["Selective", "Pre-emergence"]
+  },
+  {
+    "id": "w3",
+    "name": "Paraquat Dichloride 24% SL",
+    "price": 820,
+    "description": "Fast-acting, non-selective contact herbicide for rapid clearing of overgrown agricultural plots.",
+    "category": "Weedicides",
+    "image": "/AppImages/Products/bottle.png",
+    "rating": 4.6,
+    "reviews": 88,
+    "tags": ["Contact", "Fast-acting"]
+  }
 ]

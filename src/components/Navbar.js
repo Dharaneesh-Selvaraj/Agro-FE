@@ -32,7 +32,7 @@ export default function Navbar() {
         >
           {theme === "dark" ? "☀️" : "🌙"}
         </button>
-        <Link href="/store" className="text-sm font-semibold text-green-900 dark:text-green-50 hover:text-green-500 transition-colors uppercase tracking-widest">
+        <Link href="/products" className="text-sm font-semibold text-green-900 dark:text-green-50 hover:text-green-500 transition-colors uppercase tracking-widest">
           Store
         </Link>
         {user ? (

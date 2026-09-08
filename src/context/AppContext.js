@@ -5,6 +5,9 @@ import seedProducts from "@/data/seed.json";
 
 const AppContext = createContext();
 
+const LOCAL_STORAGE_KEY = "agro_products_v1";
+const THEME_STORAGE_KEY = "agro_theme";
+
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [fertilizers, setFertilizers] = useState([]);
@@ -12,8 +15,8 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     const savedUser = localStorage.getItem("agro_user");
-    const savedFertilizers = localStorage.getItem("agro_fertilizers_v2");
-    const savedTheme = localStorage.getItem("agro_theme");
+    const savedFertilizers = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 
     if (savedTheme) {
       setTheme(savedTheme);
@@ -63,7 +66,7 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     if (fertilizers.length > 0) {
-      localStorage.setItem("agro_fertilizers_v2", JSON.stringify(fertilizers));
+      localStorage.setItem("agro_fertilizers_v4", JSON.stringify(fertilizers));
     }
   }, [fertilizers]);
 
