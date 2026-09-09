@@ -49,7 +49,7 @@ export default function AwarenessSection() {
       frontDescription: "Extreme heat and erratic rainfall devastate crop cycles.",
       backTitle: "Drought & Heat Exhaustion",
       backDescription: "Shifting weather patterns subject coconut trees to extreme water stress. This leads to premature nut drop, withered canopies, and eventual tree death if left unmanaged during peak summer.",
-      solution: "AgroSystem nutrients enhance water retention at the root level, making palms incredibly resilient to prolonged drought."
+      solution: "Sri Venkateswara Traders nutrients enhance water retention at the root level, making palms incredibly resilient to prolonged drought."
     },
     {
       image: "/AppImages/Threats/disease.jpg",

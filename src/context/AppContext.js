@@ -5,7 +5,7 @@ import seedProducts from "@/data/seed.json";
 
 const AppContext = createContext();
 
-const LOCAL_STORAGE_KEY = "agro_products_v1";
+const LOCAL_STORAGE_KEY = "agro_products_v3";
 const THEME_STORAGE_KEY = "agro_theme";
 
 export const AppProvider = ({ children }) => {

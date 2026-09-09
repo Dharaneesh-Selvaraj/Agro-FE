@@ -21,7 +21,7 @@ export default function FertilizerCard({ fertilizer, isAdmin, onDelete }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       
-      <div className="p-6 flex flex-col flex-grow bg-white/40 dark:bg-black/20">
+      <div className="p-6 flex flex-col flex-grow bg-transparent">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-2xl font-extrabold text-green-900 dark:text-green-50 tracking-tight flex-1 pr-4">
             {fertilizer.name}
@@ -31,9 +31,15 @@ export default function FertilizerCard({ fertilizer, isAdmin, onDelete }) {
           {fertilizer.description}
         </p>
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-green-200 dark:border-green-800">
-          <span className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider">
-            Added {new Date(fertilizer.dateAdded).toLocaleDateString()}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xl font-extrabold text-green-700 dark:text-green-400">
+              ₹{fertilizer.price}
+            </span>
+            <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-md">
+              <span className="text-yellow-500 text-sm">★</span>
+              <span className="text-xs font-bold text-green-900 dark:text-green-100">{fertilizer.rating}</span>
+            </div>
+          </div>
           {isAdmin && (
             <button
               onClick={() => onDelete(fertilizer.id)}

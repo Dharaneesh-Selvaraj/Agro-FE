@@ -14,13 +14,13 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="glass-modern sticky top-4 mx-4 md:mx-auto max-w-6xl z-50 px-8 py-4 rounded-full flex items-center justify-between mb-8 mt-4 transition-all duration-300">
+    <nav className="glass-modern backdrop-blur-xl bg-white/50 dark:bg-green-950/50 sticky top-4 mx-4 lg:mx-12 z-50 px-8 py-4 rounded-full flex items-center justify-between mb-8 mt-4 transition-all duration-300 shadow-sm border border-green-200/30 dark:border-green-800/30">
       <Link href="/" className="flex items-center space-x-3 group">
         <div className="w-10 h-10 overflow-hidden rounded-full border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)] group-hover:scale-110 transition-transform bg-white">
           <img src="/logo.jpg" alt="AgroSystem Logo" className="w-full h-full object-cover mix-blend-multiply" />
         </div>
-        <span className="text-3xl font-extrabold text-green-900 dark:text-green-50 tracking-tighter">
-          Agro<span className="text-green-500">System</span>
+        <span className="text-xl md:text-2xl font-extrabold text-green-900 dark:text-green-50 tracking-tighter">
+          SRI VENKATESWARA <span className="text-green-500">TRADERS</span>
         </span>
       </Link>
 
@@ -33,7 +33,7 @@ export default function Navbar() {
           {theme === "dark" ? "☀️" : "🌙"}
         </button>
         <Link href="/products" className="text-sm font-semibold text-green-900 dark:text-green-50 hover:text-green-500 transition-colors uppercase tracking-widest">
-          Store
+          Products
         </Link>
         {user ? (
           <>

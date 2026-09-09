@@ -100,7 +100,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-green-200 dark:bg-green-950 text-green-800 dark:text-green-50/50 py-12 text-center mt-auto rounded-t-[4rem] transition-colors duration-500">
-        <h2 className="text-2xl font-bold text-green-950 dark:text-green-50 mb-4 tracking-tighter transition-colors duration-500">AgroSystem</h2>
+        <h2 className="text-2xl font-bold text-green-950 dark:text-green-50 mb-4 tracking-tighter transition-colors duration-500">Sri Venkateswara Traders</h2>
         <p className="text-sm">© {new Date().getFullYear()} All rights reserved. The Core of Coconut.</p>
       </footer>
     </div>
