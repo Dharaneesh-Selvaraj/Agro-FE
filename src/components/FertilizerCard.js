@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function FertilizerCard({ fertilizer, isAdmin, onDelete }) {
+export default function FertilizerCard({ fertilizer, isAdmin, onDelete, onEdit }) {
   return (
     <div className="glass-modern rounded-3xl overflow-hidden group hover:-translate-y-3 transition-all duration-500 flex flex-col h-full border border-green-200/50 dark:border-green-800/50 hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.3)]">
       <div className="relative w-full h-56 bg-green-100 dark:bg-green-900 overflow-hidden">
@@ -32,21 +32,27 @@ export default function FertilizerCard({ fertilizer, isAdmin, onDelete }) {
         </p>
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-green-200 dark:border-green-800">
           <div className="flex items-center gap-3">
-            <span className="text-xl font-extrabold text-green-700 dark:text-green-400">
-              ₹{fertilizer.price}
-            </span>
+            {/* Price removed as requested */}
             <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-md">
               <span className="text-yellow-500 text-sm">★</span>
               <span className="text-xs font-bold text-green-900 dark:text-green-100">{fertilizer.rating}</span>
             </div>
           </div>
           {isAdmin && (
-            <button
-              onClick={() => onDelete(fertilizer.id)}
-              className="text-red-500 hover:text-red-100 font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-red-500 rounded-full transition-all"
-            >
-              Remove
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEdit(fertilizer)}
+                className="text-blue-500 hover:text-blue-100 font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-blue-500 rounded-full transition-all border border-blue-500 hover:border-transparent"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(fertilizer.id)}
+                className="text-red-500 hover:text-red-100 font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-red-500 rounded-full transition-all border border-red-500 hover:border-transparent"
+              >
+                Remove
+              </button>
+            </div>
           )}
         </div>
       </div>

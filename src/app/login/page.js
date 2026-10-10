@@ -3,24 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [isLoginAdmin, setIsLoginAdmin] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const { login } = useAppContext();
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (isLoginAdmin && password === "admin123") {
-      login("admin", username || "Admin");
-      router.push("/admin");
-    } else if (!isLoginAdmin) {
-      login("user", username || "User");
-      router.push("/");
-    } else {
-      alert("Invalid admin password. Try 'admin123'");
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/customers/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        login(data.user.role, data.user.username);
+        if (data.user.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      } else {
+        setError(data.error || "Login failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please check if the backend is running.");
     }
   };
 
@@ -37,70 +54,62 @@ export default function LoginPage() {
         {/* Shiny top highlight */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent opacity-50"></div>
 
-        <div className="flex justify-center mb-10 bg-black/5 dark:bg-white/5 p-1.5 rounded-full w-max mx-auto shadow-inner border border-white/20">
-          <button
-            onClick={() => setIsLoginAdmin(false)}
-            className={`px-8 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all duration-300 ${
-              !isLoginAdmin ? "bg-white dark:bg-green-900 text-green-950 dark:text-white shadow-md scale-105" : "text-green-800 dark:text-green-300 hover:text-green-950"
-            }`}
-          >
-            User
-          </button>
-          <button
-            onClick={() => setIsLoginAdmin(true)}
-            className={`px-8 py-2.5 rounded-full font-bold text-sm tracking-wide transition-all duration-300 ${
-              isLoginAdmin ? "bg-white dark:bg-green-900 text-green-950 dark:text-white shadow-md scale-105" : "text-green-800 dark:text-green-300 hover:text-green-950"
-            }`}
-          >
-            Admin
-          </button>
-        </div>
-
         <h2 className="text-4xl font-extrabold text-center text-green-950 dark:text-white mb-2 tracking-tight">
-          {isLoginAdmin ? "Admin Portal" : "Welcome Back"}
+          Welcome Back
         </h2>
         <p className="text-center text-green-700 dark:text-green-300 mb-8 text-sm font-medium">
-          {isLoginAdmin ? "Enter your credentials to manage inventory." : "Sign in to view our premium catalog."}
+          Sign in to your account.
         </p>
         
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-bold text-green-900 dark:text-green-100 mb-2 ml-1">
-              Username
+              Email
             </label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition-all text-green-950 dark:text-white shadow-inner font-medium placeholder:text-green-900/40"
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               required
             />
           </div>
 
-          {isLoginAdmin && (
-            <div className="animate-in slide-in-from-top-2 duration-300">
-              <label className="block text-sm font-bold text-green-900 dark:text-green-100 mb-2 ml-1">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition-all text-green-950 dark:text-white shadow-inner font-medium placeholder:text-green-900/40"
-                placeholder="Hint: admin123"
-                required
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-bold text-green-900 dark:text-green-100 mb-2 ml-1">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-4 focus:ring-green-500/20 outline-none transition-all text-green-950 dark:text-white shadow-inner font-medium placeholder:text-green-900/40"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
 
           <button
             type="submit"
             className="w-full bg-green-500 hover:bg-green-400 text-green-950 text-lg font-extrabold py-4 rounded-2xl shadow-[0_10px_20px_-10px_rgba(34,197,94,0.6)] transition-all transform hover:-translate-y-1 mt-4"
           >
-            {isLoginAdmin ? "Authenticate" : "Sign In"}
+            Sign In
           </button>
         </form>
+
+        <p className="mt-6 text-center text-green-800 dark:text-green-300 text-sm font-medium">
+          Don't have an account?{" "}
+          <Link href="/register" className="text-green-600 dark:text-green-400 hover:underline font-bold">
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );

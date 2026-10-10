@@ -12,8 +12,6 @@ export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSubCategory, setActiveSubCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
   
   // UI State
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -55,8 +53,6 @@ export default function ProductsPage() {
     setActiveSubCategory("All");
     setExpandedCategory(null);
     setSearchQuery("");
-    setMinPrice("");
-    setMaxPrice("");
   };
 
   // Filter Logic
@@ -75,15 +71,8 @@ export default function ProductsPage() {
       results = results.filter(f => f.name.toLowerCase().includes(query));
     }
     
-    if (minPrice !== "") {
-      results = results.filter(f => f.price >= parseFloat(minPrice));
-    }
-    if (maxPrice !== "") {
-      results = results.filter(f => f.price <= parseFloat(maxPrice));
-    }
-    
     return results;
-  }, [fertilizers, activeCategory, activeSubCategory, searchQuery, minPrice, maxPrice]);
+  }, [fertilizers, activeCategory, activeSubCategory, searchQuery]);
 
   return (
     <div className="min-h-[85vh] flex flex-col w-full px-4 lg:px-12 py-12 relative z-0">
@@ -203,27 +192,6 @@ export default function ProductsPage() {
             })}
           </div>
 
-          {/* Price Range */}
-          <div>
-            <h3 className="text-sm font-bold tracking-widest text-green-800/60 dark:text-green-400/60 uppercase mb-4">Price Range</h3>
-            <div className="flex items-center gap-2">
-              <input 
-                type="number" 
-                placeholder="Min ₹"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-green-200 dark:border-green-800 bg-transparent text-sm text-green-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-              <span className="text-green-500 font-bold">-</span>
-              <input 
-                type="number" 
-                placeholder="Max ₹"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-green-200 dark:border-green-800 bg-transparent text-sm text-green-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-            </div>
-          </div>
 
         </aside>
 

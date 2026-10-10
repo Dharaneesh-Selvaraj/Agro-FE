@@ -1,21 +1,22 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+// We don't strictly need seedProducts if the backend handles it, but we'll leave it in case we want a fallback or reference
 import seedProducts from "@/data/seed.json";
 
 const AppContext = createContext();
 
-const LOCAL_STORAGE_KEY = "agro_products_v3";
 const THEME_STORAGE_KEY = "agro_theme";
+const API_URL = "http://localhost:5000/api";
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [fertilizers, setFertilizers] = useState([]);
   const [theme, setTheme] = useState("dark"); // default dark
 
+  // Initial Load (Theme & User)
   useEffect(() => {
     const savedUser = localStorage.getItem("agro_user");
-    const savedFertilizers = localStorage.getItem(LOCAL_STORAGE_KEY);
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 
     if (savedTheme) {
@@ -30,17 +31,28 @@ export const AppProvider = ({ children }) => {
     }
 
     if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedFertilizers) {
-      const parsed = JSON.parse(savedFertilizers);
-      if (parsed && parsed.length > 0) {
-        setFertilizers(parsed);
+    
+    // Fetch products from backend
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(`${API_URL}/products`);
+      if (res.ok) {
+        const data = await res.json();
+        setFertilizers(data);
       } else {
+        console.error("Failed to fetch products from backend");
+        // Fallback to local state if backend is down
         setFertilizers(seedProducts);
       }
-    } else {
+    } catch (error) {
+      console.error("Error connecting to backend API:", error);
+      // Fallback
       setFertilizers(seedProducts);
     }
-  }, []);
+  };
 
   const toggleTheme = () => {
     setTheme((prev) => {
@@ -64,12 +76,6 @@ export const AppProvider = ({ children }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (fertilizers.length > 0) {
-      localStorage.setItem("agro_fertilizers_v4", JSON.stringify(fertilizers));
-    }
-  }, [fertilizers]);
-
   const login = (role, username) => {
     setUser({ role, username });
   };
@@ -78,19 +84,77 @@ export const AppProvider = ({ children }) => {
     setUser(null);
   };
 
-  const addFertilizer = (fertilizer) => {
-    setFertilizers((prev) => [
-      { id: Date.now(), dateAdded: new Date().toISOString(), ...fertilizer },
-      ...prev,
-    ]);
+  const addFertilizer = async (fertilizer) => {
+    try {
+      const res = await fetch(`${API_URL}/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fertilizer),
+      });
+
+      if (res.ok) {
+        const { product } = await res.json();
+        // Update local state immediately for snappy UI
+        setFertilizers((prev) => [product, ...prev]);
+      } else {
+        alert("Failed to add product to database");
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Error connecting to backend");
+    }
   };
 
-  const deleteFertilizer = (id) => {
+  const editFertilizer = async (id, updatedData) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (res.ok) {
+        const { product } = await res.json();
+        setFertilizers((prev) =>
+          prev.map((f) => (f.id === id ? product : f))
+        );
+      } else {
+        alert("Failed to update product in database");
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert("Error connecting to backend");
+    }
+  };
+
+  const deleteFertilizer = async (id) => {
+    // Delete locally first for instant UI response
+    const previous = [...fertilizers];
     setFertilizers((prev) => prev.filter((f) => f.id !== id));
-  }
+
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        // Revert if failed
+        setFertilizers(previous);
+        alert("Failed to delete product from database");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      setFertilizers(previous);
+      alert("Error connecting to backend");
+    }
+  };
 
   return (
-    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, deleteFertilizer }}>
+    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, editFertilizer, deleteFertilizer }}>
       {children}
     </AppContext.Provider>
   );
