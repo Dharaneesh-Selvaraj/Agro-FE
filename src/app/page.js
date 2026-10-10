@@ -30,7 +30,7 @@ export default function Home() {
         <div className="relative z-20 px-8 w-full max-w-7xl mx-auto flex flex-col items-center text-center justify-center gap-12 mt-16">
           
           <div className="flex-1 animate-in slide-in-from-bottom duration-1000">
-            <div className="inline-flex items-center justify-center gap-2 glass-modern px-5 py-2 rounded-full mb-8 text-white font-semibold text-sm mx-auto shadow-lg backdrop-blur-md bg-black/20 border border-white/10 transition-colors duration-500">
+            <div suppressHydrationWarning className="inline-flex items-center justify-center gap-2 glass-modern px-5 py-2 rounded-full mb-8 text-white font-semibold text-sm mx-auto shadow-lg backdrop-blur-md bg-black/20 border border-white/10 transition-colors duration-500">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
               Open Today • {today}
             </div>
@@ -101,7 +101,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-green-200 dark:bg-green-950 text-green-800 dark:text-green-50/50 py-12 text-center mt-auto rounded-t-[4rem] transition-colors duration-500">
         <h2 className="text-2xl font-bold text-green-950 dark:text-green-50 mb-4 tracking-tighter transition-colors duration-500">Sri Venkateswara Traders</h2>
-        <p className="text-sm">© {new Date().getFullYear()} All rights reserved. The Core of Coconut.</p>
+        <p suppressHydrationWarning className="text-sm">© {new Date().getFullYear()} All rights reserved. The Core of Coconut.</p>
       </footer>
     </div>
   );

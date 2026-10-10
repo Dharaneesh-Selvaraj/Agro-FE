@@ -7,7 +7,7 @@ import seedProducts from "@/data/seed.json";
 const AppContext = createContext();
 
 const THEME_STORAGE_KEY = "agro_theme";
-const API_URL = "http://localhost:5000/api";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api`;
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
