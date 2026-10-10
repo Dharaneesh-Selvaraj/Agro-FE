@@ -75,8 +75,8 @@ async function seedDatabase() {
     // Check if products already exist to avoid duplicates
     const [existing] = await pool.query('SELECT COUNT(*) as count FROM products');
     if (existing[0].count > 0) {
-      console.log(`Database already has ${existing[0].count} products. Clearing table...`);
-      await pool.query('TRUNCATE TABLE products');
+      console.log(`Database already has ${existing[0].count} products. Skipping seed to save API limits.`);
+      process.exit(0);
     }
 
     console.log('Uploading images to ImgBB...');
