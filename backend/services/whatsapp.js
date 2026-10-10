@@ -1,8 +1,11 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const qrcodeLib = require('qrcode');
 
 let client;
 let isReady = false;
+let currentQrCode = null;
+let connectionStatus = 'INITIALIZING'; // INITIALIZING, NEEDS_SCAN, AUTHENTICATED, READY, DISCONNECTED
 
 function initWhatsApp() {
   console.log('Initializing WhatsApp client...');
@@ -16,43 +19,68 @@ function initWhatsApp() {
     }
   });
 
-  client.on('qr', (qr) => {
+  client.on('qr', async (qr) => {
     // Generate and scan this code with your phone
     console.log('SCAN THE QR CODE BELOW WITH WHATSAPP:');
     qrcode.generate(qr, { small: true });
+    
+    // Also generate a Base64 image for the frontend
+    try {
+      currentQrCode = await qrcodeLib.toDataURL(qr);
+      connectionStatus = 'NEEDS_SCAN';
+    } catch (err) {
+      console.error('Failed to generate QR data URL', err);
+    }
   });
 
   client.on('ready', () => {
     console.log('WhatsApp Client is ready!');
     isReady = true;
+    connectionStatus = 'READY';
+    currentQrCode = null;
   });
 
   client.on('authenticated', () => {
     console.log('WhatsApp Client authenticated successfully.');
+    connectionStatus = 'AUTHENTICATED';
+    currentQrCode = null;
     
     // Workaround for whatsapp-web.js bug where 'ready' event is skipped
     setTimeout(() => {
       if (!isReady) {
         console.log('WhatsApp Client is ready! (Bypassed)');
         isReady = true;
+        connectionStatus = 'READY';
       }
     }, 5000);
   });
 
   client.on('auth_failure', msg => {
     console.error('WhatsApp authentication failure:', msg);
+    connectionStatus = 'DISCONNECTED';
   });
 
   client.on('loading_screen', (percent, message) => {
     console.log(`Syncing WhatsApp... ${percent}% : ${message}`);
+    if (connectionStatus !== 'READY') {
+      connectionStatus = 'INITIALIZING';
+    }
   });
   
   client.on('disconnected', (reason) => {
       console.log('WhatsApp Client was logged out', reason);
       isReady = false;
+      connectionStatus = 'DISCONNECTED';
   });
 
   client.initialize();
+}
+
+function getWhatsAppStatus() {
+  return {
+    status: connectionStatus,
+    qr: currentQrCode
+  };
 }
 
 /**
@@ -96,4 +124,4 @@ async function sendMessage(number, text, imageUrl = null) {
   }
 }
 
-module.exports = { initWhatsApp, sendMessage };
+module.exports = { initWhatsApp, sendMessage, getWhatsAppStatus };

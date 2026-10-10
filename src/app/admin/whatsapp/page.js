@@ -87,6 +87,27 @@ export default function WhatsAppPromoPage() {
     }
   };
 
+  const [waStatus, setWaStatus] = useState("INITIALIZING");
+  const [waQr, setWaQr] = useState(null);
+
+  useEffect(() => {
+    // Poll WhatsApp status every 3 seconds
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/whatsapp/status`);
+        if (res.ok) {
+          const data = await res.json();
+          setWaStatus(data.status);
+          setWaQr(data.qr);
+        }
+      } catch (err) {
+        console.error("Failed to fetch WhatsApp status", err);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="container mx-auto px-6 py-10 min-h-screen">
       
@@ -101,6 +122,42 @@ export default function WhatsAppPromoPage() {
         
         {/* Form Container */}
         <div className="w-full lg:w-1/2 glass-modern p-10 rounded-[2.5rem] shadow-2xl relative">
+          
+          {/* WhatsApp Connection Status Panel */}
+          <div className="mb-8 p-6 rounded-2xl bg-white/50 dark:bg-black/30 border border-blue-200 dark:border-blue-800 shadow-inner">
+            <h3 className="text-xl font-bold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
+              📱 WhatsApp Connection Status
+            </h3>
+            
+            {waStatus === "INITIALIZING" && (
+              <div className="flex items-center gap-3 text-yellow-600 dark:text-yellow-400 font-semibold">
+                <span className="animate-spin text-2xl">⏳</span> Starting up WhatsApp engine...
+              </div>
+            )}
+            
+            {waStatus === "NEEDS_SCAN" && waQr && (
+              <div className="flex flex-col items-center text-center">
+                <p className="text-red-500 font-bold mb-4">Device not linked! Scan this QR code with your phone:</p>
+                <div className="bg-white p-4 rounded-xl shadow-lg inline-block">
+                  <img src={waQr} alt="WhatsApp Login QR Code" className="w-48 h-48" />
+                </div>
+                <p className="text-sm text-gray-500 mt-3">Open WhatsApp {">"} Linked Devices {">"} Link a Device</p>
+              </div>
+            )}
+
+            {(waStatus === "READY" || waStatus === "AUTHENTICATED") && (
+              <div className="flex items-center gap-3 text-green-600 dark:text-green-400 font-bold text-lg">
+                <span className="text-3xl">✅</span> Connected & Ready to Send!
+              </div>
+            )}
+
+            {waStatus === "DISCONNECTED" && (
+              <div className="flex items-center gap-3 text-red-600 font-bold">
+                <span className="text-3xl">❌</span> Disconnected. Restarting...
+              </div>
+            )}
+          </div>
+
           <p className="text-blue-800 dark:text-blue-300 mb-8 font-medium text-lg border-b border-blue-200/50 pb-4">
             Design a promotional message to send instantly to all registered customers.
           </p>

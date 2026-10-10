@@ -22,6 +22,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'Server is running' });
 });
 
+app.get('/api/whatsapp/status', (req, res) => {
+  const { getWhatsAppStatus } = require('./services/whatsapp');
+  res.status(200).json(getWhatsAppStatus());
+});
+
 // Initialize Database and Services, then start server
 async function startServer() {
   console.log("Starting server initialization...");
