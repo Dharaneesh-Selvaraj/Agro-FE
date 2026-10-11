@@ -62,7 +62,7 @@ function initWhatsApp() {
 
   client.on('loading_screen', (percent, message) => {
     console.log(`Syncing WhatsApp... ${percent}% : ${message}`);
-    if (connectionStatus !== 'READY') {
+    if (connectionStatus !== 'READY' && connectionStatus !== 'NEEDS_SCAN') {
       connectionStatus = 'INITIALIZING';
     }
   });
@@ -70,6 +70,7 @@ function initWhatsApp() {
   client.on('disconnected', (reason) => {
       console.log('WhatsApp Client was logged out', reason);
       isReady = false;
+      currentQrCode = null;
       connectionStatus = 'DISCONNECTED';
   });
 
@@ -77,8 +78,14 @@ function initWhatsApp() {
 }
 
 function getWhatsAppStatus() {
+  let status = connectionStatus;
+  if (isReady) {
+    status = 'READY';
+  } else if (currentQrCode) {
+    status = 'NEEDS_SCAN';
+  }
   return {
-    status: connectionStatus,
+    status,
     qr: currentQrCode
   };
 }

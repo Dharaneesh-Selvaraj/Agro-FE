@@ -129,13 +129,7 @@ export default function WhatsAppPromoPage() {
               📱 WhatsApp Connection Status
             </h3>
             
-            {waStatus === "INITIALIZING" && (
-              <div className="flex items-center gap-3 text-yellow-600 dark:text-yellow-400 font-semibold">
-                <span className="animate-spin text-2xl">⏳</span> Starting up WhatsApp engine...
-              </div>
-            )}
-            
-            {waStatus === "NEEDS_SCAN" && waQr && (
+            {waQr && waStatus !== "READY" && waStatus !== "AUTHENTICATED" ? (
               <div className="flex flex-col items-center text-center">
                 <p className="text-red-500 font-bold mb-4">Device not linked! Scan this QR code with your phone:</p>
                 <div className="bg-white p-4 rounded-xl shadow-lg inline-block">
@@ -143,17 +137,17 @@ export default function WhatsAppPromoPage() {
                 </div>
                 <p className="text-sm text-gray-500 mt-3">Open WhatsApp {">"} Linked Devices {">"} Link a Device</p>
               </div>
-            )}
-
-            {(waStatus === "READY" || waStatus === "AUTHENTICATED") && (
+            ) : (waStatus === "READY" || waStatus === "AUTHENTICATED") ? (
               <div className="flex items-center gap-3 text-green-600 dark:text-green-400 font-bold text-lg">
                 <span className="text-3xl">✅</span> Connected & Ready to Send!
               </div>
-            )}
-
-            {waStatus === "DISCONNECTED" && (
+            ) : waStatus === "DISCONNECTED" ? (
               <div className="flex items-center gap-3 text-red-600 font-bold">
                 <span className="text-3xl">❌</span> Disconnected. Restarting...
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 text-yellow-600 dark:text-yellow-400 font-semibold">
+                <span className="animate-spin text-2xl">⏳</span> Starting up WhatsApp engine...
               </div>
             )}
           </div>
