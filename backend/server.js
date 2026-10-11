@@ -49,10 +49,20 @@ async function startServer() {
   initWhatsApp();
 
   // 3. Start listening
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
   });
 }
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received. Shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received. Shutting down gracefully...');
+  process.exit(0);
+});
 
 startServer().catch(err => {
   console.error("Failed to start server:", err);
