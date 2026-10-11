@@ -9,43 +9,40 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'No file uploaded' }, { status: 400 });
     }
 
-    const apiKey = process.env.IMGBB_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'IMGBB_API_KEY is not configured in .env.local' 
-      }, { status: 500 });
-    }
-
     // Convert file to base64
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const base64Image = buffer.toString('base64');
+    const mimeType = file.type || 'image/png';
+    const base64Image = `data:${mimeType};base64,` + buffer.toString('base64');
 
-    // Send to ImgBB
-    const imgbbFormData = new FormData();
-    imgbbFormData.append('image', base64Image);
-
-    const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    // Forward directly to Railway backend
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://agro-fe-production.up.railway.app';
+    const uploadRes = await fetch(`${backendUrl}/api/upload`, {
       method: 'POST',
-      body: imgbbFormData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image: base64Image,
+        filename: file.name
+      })
     });
 
-    const imgbbData = await imgbbResponse.json();
+    const uploadJson = await uploadRes.json();
 
-    if (imgbbData.success) {
+    if (uploadRes.ok && uploadJson.success) {
       return NextResponse.json({ 
         success: true, 
-        // This is the direct public URL to the uploaded image
-        imageUrl: imgbbData.data.display_url 
+        imageUrl: uploadJson.imageUrl 
       });
     } else {
-      console.error('ImgBB Error:', imgbbData);
-      return NextResponse.json({ success: false, error: 'Failed to upload image to ImgBB' }, { status: 500 });
+      console.error('Backend upload error:', uploadJson);
+      return NextResponse.json({ 
+        success: false, 
+        error: uploadJson.error || 'Failed to save image on server' 
+      }, { status: 500 });
     }
 
   } catch (error) {
     console.error('Error uploading file:', error);
-    return NextResponse.json({ success: false, error: 'Failed to upload file' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Failed to upload file' }, { status: 500 });
   }
 }

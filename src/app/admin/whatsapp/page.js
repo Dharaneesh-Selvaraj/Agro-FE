@@ -13,6 +13,7 @@ export default function WhatsAppPromoPage() {
   const [promoLink, setPromoLink] = useState("");
   const [targetPhone, setTargetPhone] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   
   const [isSending, setIsSending] = useState(false);
   const [isRestartingWa, setIsRestartingWa] = useState(false);
@@ -77,7 +78,7 @@ export default function WhatsAppPromoPage() {
     let uploadedImageUrl = "";
 
     try {
-      // 1. Upload image to ImgBB if provided
+      // 1. Upload image to backend if provided, or use direct URL
       if (imageFile) {
         const data = new FormData();
         data.append('file', imageFile);
@@ -91,10 +92,12 @@ export default function WhatsAppPromoPage() {
         if (json.success) {
           uploadedImageUrl = json.imageUrl;
         } else {
-          alert('Failed to upload promotional image: ' + json.error);
+          alert('Failed to upload promotional image: ' + (json.error || 'Server error'));
           setIsSending(false);
           return;
         }
+      } else if (imageUrlInput && imageUrlInput.trim()) {
+        uploadedImageUrl = imageUrlInput.trim();
       }
 
       // 2. Send the message payload to the backend
@@ -123,6 +126,7 @@ export default function WhatsAppPromoPage() {
         setPromoLink("");
         setTargetPhone("");
         setImageFile(null);
+        setImageUrlInput("");
         const fileInput = document.getElementById('promoImage');
         if(fileInput) fileInput.value = "";
       } else {
@@ -223,7 +227,7 @@ export default function WhatsAppPromoPage() {
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-bold text-blue-900 dark:text-blue-200 mb-2 ml-1">Promotional Image (Optional)</label>
-              <div className="w-full relative border-2 border-dashed border-blue-400 dark:border-blue-600 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors p-8 text-center cursor-pointer overflow-hidden">
+              <div className="w-full relative border-2 border-dashed border-blue-400 dark:border-blue-600 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-800/40 transition-colors p-6 text-center cursor-pointer overflow-hidden">
                 <input
                   id="promoImage"
                   type="file"
@@ -232,14 +236,26 @@ export default function WhatsAppPromoPage() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 {imageFile ? (
-                  <div className="text-blue-800 dark:text-blue-200 font-semibold truncate text-lg">
+                  <div className="text-blue-800 dark:text-blue-200 font-semibold truncate text-base">
                     🖼️ {imageFile.name}
                   </div>
                 ) : (
-                  <div className="text-blue-700 dark:text-blue-400 font-medium">
-                    Drag & Drop or Click to Upload Image
+                  <div className="text-blue-700 dark:text-blue-400 font-medium text-sm">
+                    Drag & Drop or Click to Upload Image File
                   </div>
                 )}
+              </div>
+
+              {/* Or paste direct URL */}
+              <div className="mt-3">
+                <div className="text-xs font-semibold text-gray-500 mb-1 ml-1">— OR PASTE AN IMAGE LINK DIRECTLY —</div>
+                <input
+                  type="url"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  placeholder="https://example.com/banner.png"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/50 dark:bg-black/20 border border-blue-200 dark:border-blue-800 text-sm focus:border-blue-500 outline-none transition text-blue-950 dark:text-white"
+                />
               </div>
             </div>
 
@@ -321,9 +337,13 @@ export default function WhatsAppPromoPage() {
               <div className="mt-4 flex-grow flex flex-col justify-end space-y-4 overflow-y-auto">
                 <div className="bg-white rounded-xl rounded-tl-none p-2 shadow-sm max-w-[85%] relative self-start">
                   
-                  {imageFile && (
-                    <div className="w-full h-40 bg-gray-200 rounded-lg mb-2 overflow-hidden flex items-center justify-center text-gray-400 font-medium">
-                      [Image Attached]
+                  {(imageFile || imageUrlInput) && (
+                    <div className="w-full h-40 bg-gray-200 rounded-lg mb-2 overflow-hidden flex items-center justify-center text-gray-500 font-medium">
+                      {imageUrlInput ? (
+                        <img src={imageUrlInput} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>🖼️ {imageFile?.name}</span>
+                      )}
                     </div>
                   )}
 
