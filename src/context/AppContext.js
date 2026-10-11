@@ -7,7 +7,7 @@ import seedProducts from "@/data/seed.json";
 const AppContext = createContext();
 
 const THEME_STORAGE_KEY = "agro_theme";
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api`;
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -41,7 +41,11 @@ export const AppProvider = ({ children }) => {
       const res = await fetch(`${API_URL}/products`);
       if (res.ok) {
         const data = await res.json();
-        setFertilizers(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setFertilizers(data);
+        } else {
+          setFertilizers(seedProducts);
+        }
       } else {
         console.error("Failed to fetch products from backend");
         // Fallback to local state if backend is down

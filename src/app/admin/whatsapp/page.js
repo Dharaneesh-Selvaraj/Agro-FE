@@ -58,7 +58,7 @@ export default function WhatsAppPromoPage() {
       }
 
       // 2. Send the message payload to the backend
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/customers/notify`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api/customers/notify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -94,7 +94,7 @@ export default function WhatsAppPromoPage() {
     // Poll WhatsApp status every 3 seconds
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/whatsapp/status`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api/whatsapp/status`);
         if (res.ok) {
           const data = await res.json();
           setWaStatus(data.status);
