@@ -13,6 +13,11 @@ function initWhatsApp() {
   // LocalAuth saves the session locally so you don't have to scan QR every time
   client = new Client({
     authStrategy: new LocalAuth(),
+    webVersionCache: {
+      type: 'remote',
+      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
+      strict: false
+    },
     puppeteer: {
       headless: true,
       protocolTimeout: 300000, // 5 min timeout to prevent Runtime.callFunctionOn timed out
@@ -50,29 +55,22 @@ function initWhatsApp() {
   });
 
   client.on('authenticated', () => {
-    console.log('WhatsApp Client authenticated successfully.');
-    connectionStatus = 'AUTHENTICATED';
+    console.log('WhatsApp Client authenticated successfully. Syncing chats...');
+    connectionStatus = 'SYNCING';
+    isReady = false;
     currentQrCode = null;
-    
-    // Workaround for whatsapp-web.js bug where 'ready' event is skipped
-    setTimeout(() => {
-      if (!isReady) {
-        console.log('WhatsApp Client is ready! (Bypassed)');
-        isReady = true;
-        connectionStatus = 'READY';
-      }
-    }, 5000);
   });
 
   client.on('auth_failure', msg => {
     console.error('WhatsApp authentication failure:', msg);
+    isReady = false;
     connectionStatus = 'DISCONNECTED';
   });
 
   client.on('loading_screen', (percent, message) => {
     console.log(`Syncing WhatsApp... ${percent}% : ${message}`);
-    if (connectionStatus !== 'READY' && connectionStatus !== 'NEEDS_SCAN') {
-      connectionStatus = 'INITIALIZING';
+    if (connectionStatus !== 'READY') {
+      connectionStatus = 'SYNCING';
     }
   });
   
@@ -108,7 +106,7 @@ function getWhatsAppStatus() {
   let status = connectionStatus;
   if (isReady) {
     status = 'READY';
-  } else if (currentQrCode) {
+  } else if (currentQrCode && status !== 'SYNCING') {
     status = 'NEEDS_SCAN';
   }
   return {
@@ -135,7 +133,7 @@ function formatPhoneNumber(number) {
  */
 async function sendMessage(number, text, imageUrl = null) {
   if (!isReady) {
-    throw new Error('WhatsApp client is not ready yet. Please wait or scan the QR code.');
+    throw new Error('WhatsApp client is still synchronizing or not ready. Please wait a moment until status shows Ready.');
   }
 
   try {
@@ -151,7 +149,19 @@ async function sendMessage(number, text, imageUrl = null) {
     }
 
     console.log(`Sending WhatsApp message to ${chatId}...`);
-    await client.sendMessage(chatId, finalPayload);
+    
+    // Pass options to disable link preview fetch and read receipt on new chats (which hang headless Chrome)
+    // and enforce a 35s timeout so requests never hang for minutes
+    const sendPromise = client.sendMessage(chatId, finalPayload, {
+      linkPreview: false,
+      sendSeen: false
+    });
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('WhatsApp message delivery timed out after 35s. WhatsApp is likely still synchronizing chats. Please wait a few seconds and try again.')), 35000)
+    );
+
+    await Promise.race([sendPromise, timeoutPromise]);
     
     console.log(`Message successfully sent to ${cleanNumber} (${chatId})`);
     return true;

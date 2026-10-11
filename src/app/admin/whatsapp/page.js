@@ -168,7 +168,7 @@ export default function WhatsAppPromoPage() {
               </button>
             </div>
             
-            {waQr && waStatus !== "READY" && waStatus !== "AUTHENTICATED" ? (
+            {waQr && waStatus !== "READY" && waStatus !== "SYNCING" && waStatus !== "AUTHENTICATED" ? (
               <div className="flex flex-col items-center text-center">
                 <p className="text-red-500 font-bold mb-4">Device not linked! Scan this QR code with your phone:</p>
                 <div className="bg-white p-4 rounded-xl shadow-lg inline-block">
@@ -176,9 +176,13 @@ export default function WhatsAppPromoPage() {
                 </div>
                 <p className="text-sm text-gray-500 mt-3">Open WhatsApp {">"} Linked Devices {">"} Link a Device</p>
               </div>
-            ) : (waStatus === "READY" || waStatus === "AUTHENTICATED") ? (
+            ) : waStatus === "READY" ? (
               <div className="flex items-center gap-3 text-green-600 dark:text-green-400 font-bold text-lg">
                 <span className="text-3xl">✅</span> Connected & Ready to Send!
+              </div>
+            ) : (waStatus === "SYNCING" || waStatus === "AUTHENTICATED") ? (
+              <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400 font-semibold">
+                <span className="animate-spin text-2xl">🔄</span> Authenticated! Syncing chats with phone... Please wait a few seconds before sending.
               </div>
             ) : waStatus === "DISCONNECTED" ? (
               <div className="flex items-center gap-3 text-red-600 font-bold">
@@ -266,13 +270,17 @@ export default function WhatsAppPromoPage() {
 
             <button
               type="submit"
-              disabled={isSending || !promoMessage}
-              style={{ backgroundColor: isSending || !promoMessage ? '#a3e6b5' : '#25D366' }}
+              disabled={isSending || !promoMessage || waStatus !== "READY"}
+              style={{ backgroundColor: isSending || !promoMessage || waStatus !== "READY" ? '#a3e6b5' : '#25D366' }}
               className="w-full hover:opacity-90 text-white text-xl font-extrabold py-5 rounded-2xl shadow-[0_10px_20px_-10px_rgba(37,211,102,0.6)] transition-all transform hover:-translate-y-1 mt-6 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
             >
               {isSending ? (
                 <>
                   <span className="animate-spin text-2xl">⏳</span> Sending Message...
+                </>
+              ) : waStatus !== "READY" ? (
+                <>
+                  <span className="text-2xl">🔒</span> Waiting for WhatsApp Connection...
                 </>
               ) : targetPhone ? (
                 <>
