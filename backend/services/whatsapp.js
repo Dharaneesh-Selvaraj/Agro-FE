@@ -1,6 +1,8 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const qrcodeLib = require('qrcode');
+const fs = require('fs');
+const path = require('path');
 
 let client;
 let isReady = false;
@@ -13,11 +15,6 @@ function initWhatsApp() {
   // LocalAuth saves the session locally so you don't have to scan QR every time
   client = new Client({
     authStrategy: new LocalAuth(),
-    webVersionCache: {
-      type: 'remote',
-      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
-      strict: false
-    },
     puppeteer: {
       headless: true,
       protocolTimeout: 300000, // 5 min timeout to prevent Runtime.callFunctionOn timed out
@@ -95,6 +92,18 @@ async function restartWhatsApp() {
   } catch (err) {
     console.error('Error destroying previous WhatsApp client:', err);
   }
+
+  // Clear stale auth directory to ensure fresh QR linking handshake
+  try {
+    const authDir = path.join(process.cwd(), '.wwebjs_auth');
+    if (fs.existsSync(authDir)) {
+      fs.rmSync(authDir, { recursive: true, force: true });
+      console.log('Cleaned stale .wwebjs_auth directory');
+    }
+  } catch (err) {
+    console.warn('Could not remove auth directory:', err.message);
+  }
+
   isReady = false;
   currentQrCode = null;
   connectionStatus = 'INITIALIZING';
