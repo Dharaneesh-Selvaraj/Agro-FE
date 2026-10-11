@@ -140,22 +140,7 @@ async function sendMessage(number, text, imageUrl = null) {
 
   try {
     const cleanNumber = formatPhoneNumber(number);
-    let chatId = `${cleanNumber}@c.us`;
-    
-    // Check if the number is registered on WhatsApp first.
-    // Wrap in a 10s timeout to prevent CDP protocol calls from hanging indefinitely.
-    try {
-      const getNumberIdPromise = client.getNumberId(cleanNumber);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('getNumberId lookup timed out')), 10000)
-      );
-      const numberDetails = await Promise.race([getNumberIdPromise, timeoutPromise]);
-      if (numberDetails && numberDetails._serialized) {
-        chatId = numberDetails._serialized;
-      }
-    } catch (lookupErr) {
-      console.warn(`WhatsApp number lookup warning for ${cleanNumber}: ${lookupErr.message}. Falling back to direct chatId ${chatId}`);
-    }
+    const chatId = `${cleanNumber}@c.us`;
     
     // Instead of using MessageMedia (which is currently broken in this whatsapp-web.js version 
     // due to a Meta update), we simply append the image link to the text. 
@@ -165,6 +150,7 @@ async function sendMessage(number, text, imageUrl = null) {
       finalPayload = `[Promotional Image]\n${imageUrl}\n\n${text}`;
     }
 
+    console.log(`Sending WhatsApp message to ${chatId}...`);
     await client.sendMessage(chatId, finalPayload);
     
     console.log(`Message successfully sent to ${cleanNumber} (${chatId})`);
