@@ -27,7 +27,6 @@ function initWhatsApp() {
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
-        '--no-zygote',
         '--disable-gpu'
       ]
     }
@@ -138,7 +137,13 @@ async function sendMessage(number, text, imageUrl = null) {
 
   try {
     const cleanNumber = formatPhoneNumber(number);
-    const chatId = `${cleanNumber}@c.us`;
+    let chatId = `${cleanNumber}@c.us`;
+
+    // If recipient is the logged-in user themselves, use their exact registered wid
+    if (client.info && client.info.wid && client.info.wid.user === cleanNumber) {
+      chatId = client.info.wid._serialized;
+      console.log(`[WA] Sending to logged-in user self-chat: ${chatId}`);
+    }
     
     // Instead of using MessageMedia (which is currently broken in this whatsapp-web.js version 
     // due to a Meta update), we simply append the image link to the text. 
@@ -148,22 +153,21 @@ async function sendMessage(number, text, imageUrl = null) {
       finalPayload = `[Promotional Image]\n${imageUrl}\n\n${text}`;
     }
 
-    console.log(`Sending WhatsApp message to ${chatId}...`);
+    console.log(`[WA] Sending WhatsApp message to ${chatId}...`);
     
-    // Pass options to disable link preview fetch and read receipt on new chats (which hang headless Chrome)
-    // and enforce a 35s timeout so requests never hang for minutes
+    // Pass options to disable link preview fetch and read receipt on new chats
     const sendPromise = client.sendMessage(chatId, finalPayload, {
       linkPreview: false,
       sendSeen: false
     });
 
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('WhatsApp message delivery timed out after 35s. WhatsApp is likely still synchronizing chats. Please wait a few seconds and try again.')), 35000)
+      setTimeout(() => reject(new Error('WhatsApp message delivery timed out after 90s. WhatsApp may be slow or connection busy. Please retry.')), 90000)
     );
 
     await Promise.race([sendPromise, timeoutPromise]);
     
-    console.log(`Message successfully sent to ${cleanNumber} (${chatId})`);
+    console.log(`[WA] Message successfully sent to ${cleanNumber} (${chatId})`);
     return true;
   } catch (error) {
     console.error(`Failed to send message to ${number}:`, error.message || error);

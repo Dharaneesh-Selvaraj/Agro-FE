@@ -284,7 +284,7 @@ export default function WhatsAppPromoPage() {
                 </>
               ) : targetPhone ? (
                 <>
-                  <span className="text-2xl">📲</span> Send Message to {targetPhone}
+                  <span className="text-2xl">📲</span> Send Automated Message to {targetPhone}
                 </>
               ) : (
                 <>
@@ -292,6 +292,18 @@ export default function WhatsAppPromoPage() {
                 </>
               )}
             </button>
+
+            {/* Quick 1-Click WhatsApp Direct Link Option */}
+            {targetPhone && promoMessage && (
+              <a
+                href={`https://wa.me/${targetPhone.replace(/\D/g, '').length === 10 ? '91' + targetPhone.replace(/\D/g, '') : targetPhone.replace(/\D/g, '')}?text=${encodeURIComponent(promoMessage + (promoLink ? '\n\n' + promoLink : ''))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 text-center block mt-3"
+              >
+                <span>💬</span> Or Send Directly via WhatsApp Web / App (1-Click)
+              </a>
+            )}
           </form>
         </div>
 
