@@ -1,118 +1,127 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const qrcodeLib = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
-let client;
+let sock = null;
 let isReady = false;
 let currentQrCode = null;
 let connectionStatus = 'INITIALIZING'; // INITIALIZING, NEEDS_SCAN, AUTHENTICATED, READY, DISCONNECTED
+const AUTH_DIR = path.join(process.cwd(), 'baileys_auth');
 
-function initWhatsApp() {
-  console.log('Initializing WhatsApp client...');
-  
-  // Clean, standard Puppeteer configuration without conflicting flags
-  client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu'
-      ]
-    }
-  });
+async function initWhatsApp() {
+  console.log('[Baileys] Initializing WhatsApp engine (Browserless, direct WebSocket)...');
+  connectionStatus = 'INITIALIZING';
+  isReady = false;
 
-  client.on('qr', async (qr) => {
-    // Print directly to terminal (so you can scan from terminal like before)
-    console.log('SCAN THE QR CODE BELOW WITH WHATSAPP:');
-    qrcode.generate(qr, { small: true });
-    
-    // Also provide data URL for the web UI
-    try {
-      currentQrCode = await qrcodeLib.toDataURL(qr);
-      connectionStatus = 'NEEDS_SCAN';
-    } catch (err) {
-      console.error('Failed to generate QR data URL', err);
-    }
-  });
+  try {
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+    const { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1015901307], isLatest: true }));
+    console.log(`[Baileys] Using WA Web v${version.join('.')}, isLatest: ${isLatest}`);
 
-  client.on('ready', () => {
-    console.log('WhatsApp Client is ready!');
-    isReady = true;
-    connectionStatus = 'READY';
-    currentQrCode = null;
-  });
+    sock = makeWASocket({
+      version,
+      auth: state,
+      printQRInTerminal: false,
+      logger: pino({ level: 'silent' }),
+      browser: ['Sri Venkateswara Traders', 'Chrome', '1.0.0'],
+      syncFullHistory: false,
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 60000,
+      keepAliveIntervalMs: 25000
+    });
 
-  client.on('authenticated', () => {
-    console.log('WhatsApp Client authenticated successfully.');
-    connectionStatus = 'AUTHENTICATED';
-    currentQrCode = null;
+    sock.ev.on('creds.update', saveCreds);
 
-    // Fast-path ready fallback: marks ready after 5s if ready event is skipped by WA Web
-    setTimeout(() => {
-      if (!isReady) {
-        console.log('WhatsApp Client is ready! (Bypassed)');
+    sock.ev.on('connection.update', async (update) => {
+      const { connection, lastDisconnect, qr } = update;
+
+      if (qr) {
+        console.log('SCAN THE QR CODE BELOW WITH WHATSAPP:');
+        qrcode.generate(qr, { small: true });
+
+        try {
+          currentQrCode = await qrcodeLib.toDataURL(qr);
+          connectionStatus = 'NEEDS_SCAN';
+          isReady = false;
+        } catch (err) {
+          console.error('[Baileys] Failed to generate QR data URL:', err);
+        }
+      }
+
+      if (connection === 'connecting') {
+        console.log('[Baileys] Connecting to WhatsApp network...');
+        if (!currentQrCode) {
+          connectionStatus = 'INITIALIZING';
+        }
+      }
+
+      if (connection === 'open') {
+        console.log('[Baileys] ✅ WhatsApp Client is connected and READY to send!');
         isReady = true;
         connectionStatus = 'READY';
+        currentQrCode = null;
       }
-    }, 5000);
-  });
 
-  client.on('auth_failure', msg => {
-    console.error('WhatsApp authentication failure:', msg);
-    isReady = false;
-    connectionStatus = 'DISCONNECTED';
-  });
+      if (connection === 'close') {
+        isReady = false;
+        const statusCode = lastDisconnect?.error?.output?.statusCode;
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+        console.log(`[Baileys] Connection closed (code: ${statusCode}). Reconnect: ${shouldReconnect}`);
 
-  client.on('loading_screen', (percent, message) => {
-    console.log(`Syncing WhatsApp... ${percent}% : ${message}`);
-    if (connectionStatus !== 'READY') {
-      connectionStatus = 'INITIALIZING';
-    }
-  });
-  
-  client.on('disconnected', (reason) => {
-    console.log('WhatsApp Client was logged out', reason);
-    isReady = false;
-    currentQrCode = null;
-    connectionStatus = 'DISCONNECTED';
-  });
+        if (shouldReconnect) {
+          connectionStatus = 'INITIALIZING';
+          setTimeout(() => {
+            initWhatsApp();
+          }, 3000);
+        } else {
+          console.log('[Baileys] Session logged out. Wiping credentials for clean QR...');
+          connectionStatus = 'DISCONNECTED';
+          currentQrCode = null;
+          try {
+            if (fs.existsSync(AUTH_DIR)) {
+              fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+            }
+          } catch (e) {}
+          setTimeout(() => {
+            initWhatsApp();
+          }, 2000);
+        }
+      }
+    });
 
-  client.initialize().catch(err => {
-    console.error('Error during WhatsApp client initialize:', err);
+  } catch (err) {
+    console.error('[Baileys] Initialization error:', err);
     connectionStatus = 'DISCONNECTED';
-  });
+  }
 }
 
 async function restartWhatsApp() {
-  console.log('Restarting WhatsApp client...');
+  console.log('[Baileys] Restarting WhatsApp client...');
   try {
-    if (client) {
-      await client.destroy();
+    if (sock) {
+      sock.end();
+      sock = null;
     }
-  } catch (err) {
-    console.error('Error destroying previous WhatsApp client:', err);
+  } catch (e) {
+    console.warn('[Baileys] Socket close warning:', e.message);
   }
 
-  // Clear stale auth directory if needed
   try {
-    const authDir = path.join(process.cwd(), '.wwebjs_auth');
-    if (fs.existsSync(authDir)) {
-      fs.rmSync(authDir, { recursive: true, force: true });
-      console.log('Cleaned stale .wwebjs_auth directory');
+    if (fs.existsSync(AUTH_DIR)) {
+      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+      console.log('[Baileys] Removed stale session data');
     }
   } catch (err) {
-    console.warn('Could not remove auth directory:', err.message);
+    console.warn('[Baileys] Could not remove auth directory:', err.message);
   }
 
   isReady = false;
   currentQrCode = null;
   connectionStatus = 'INITIALIZING';
-  initWhatsApp();
+  await initWhatsApp();
 }
 
 function getWhatsAppStatus() {
@@ -145,38 +154,34 @@ function formatPhoneNumber(number) {
  * @param {string} [imageUrl] - Optional URL of the image to send
  */
 async function sendMessage(number, text, imageUrl = null) {
-  if (!isReady) {
-    throw new Error('WhatsApp client is not ready yet. Please wait or scan the QR code.');
+  if (!sock || !isReady) {
+    throw new Error('WhatsApp client is not connected. Please scan the QR code first.');
   }
 
   try {
     const cleanNumber = formatPhoneNumber(number);
-    let chatId = `${cleanNumber}@c.us`;
+    const jid = `${cleanNumber}@s.whatsapp.net`;
 
-    // Attempt getNumberId with a 4s cap to populate WA Web's internal contact cache
-    try {
-      const numberDetails = await Promise.race([
-        client.getNumberId(cleanNumber),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('lookup timeout')), 4000))
-      ]);
-      if (numberDetails && numberDetails._serialized) {
-        chatId = numberDetails._serialized;
-      }
-    } catch (lookupErr) {
-      console.log(`[WA] Using standard chatId ${chatId} (${lookupErr.message})`);
+    console.log(`[Baileys] Sending message to ${jid}...`);
+
+    let response;
+    if (imageUrl && imageUrl.trim()) {
+      // Send real native image with caption
+      response = await sock.sendMessage(jid, {
+        image: { url: imageUrl.trim() },
+        caption: text
+      });
+    } else {
+      // Send text message
+      response = await sock.sendMessage(jid, {
+        text: text
+      });
     }
 
-    let finalPayload = text;
-    if (imageUrl) {
-      finalPayload = `[Promotional Image]\n${imageUrl}\n\n${text}`;
-    }
-
-    console.log(`[WA] Sending message to ${chatId}...`);
-    await client.sendMessage(chatId, finalPayload);
-    console.log(`[WA] Message successfully sent to ${cleanNumber}`);
+    console.log(`[Baileys] ✅ Message successfully delivered to ${cleanNumber}! Key:`, response?.key?.id);
     return true;
   } catch (error) {
-    console.error(`Failed to send message to ${number}:`, error.message || error);
+    console.error(`[Baileys] Failed to send message to ${number}:`, error.message || error);
     throw error;
   }
 }
