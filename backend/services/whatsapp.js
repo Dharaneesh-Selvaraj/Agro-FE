@@ -13,9 +13,18 @@ function initWhatsApp() {
   // LocalAuth saves the session locally so you don't have to scan QR every time
   client = new Client({
     authStrategy: new LocalAuth(),
-    // Puppeteer args to help it run on some environments
     puppeteer: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: true,
+      protocolTimeout: 300000, // 5 min timeout to prevent Runtime.callFunctionOn timed out
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
     }
   });
 
@@ -74,7 +83,25 @@ function initWhatsApp() {
       connectionStatus = 'DISCONNECTED';
   });
 
-  client.initialize();
+  client.initialize().catch(err => {
+    console.error('Error during WhatsApp client initialize:', err);
+    connectionStatus = 'DISCONNECTED';
+  });
+}
+
+async function restartWhatsApp() {
+  console.log('Restarting WhatsApp client...');
+  try {
+    if (client) {
+      await client.destroy();
+    }
+  } catch (err) {
+    console.error('Error destroying previous WhatsApp client:', err);
+  }
+  isReady = false;
+  currentQrCode = null;
+  connectionStatus = 'INITIALIZING';
+  initWhatsApp();
 }
 
 function getWhatsAppStatus() {
@@ -90,9 +117,19 @@ function getWhatsAppStatus() {
   };
 }
 
+function formatPhoneNumber(number) {
+  let cleanNumber = String(number || '').replace(/\D/g, '');
+  if (cleanNumber.length === 11 && cleanNumber.startsWith('0')) {
+    cleanNumber = '91' + cleanNumber.substring(1);
+  } else if (cleanNumber.length === 10) {
+    cleanNumber = '91' + cleanNumber;
+  }
+  return cleanNumber;
+}
+
 /**
  * Sends a message to a specific number, optionally with an image
- * @param {string} number - The phone number (e.g., '919876543210')
+ * @param {string} number - The phone number (e.g., '919876543210' or '9876543210')
  * @param {string} text - The message content (or caption if image is provided)
  * @param {string} [imageUrl] - Optional URL of the image to send
  */
@@ -102,16 +139,23 @@ async function sendMessage(number, text, imageUrl = null) {
   }
 
   try {
-    const cleanNumber = number.replace(/\D/g, '');
+    const cleanNumber = formatPhoneNumber(number);
+    let chatId = `${cleanNumber}@c.us`;
     
     // Check if the number is registered on WhatsApp first.
-    // This also populates the local WhatsApp cache to prevent the "Data passed to getter" error.
-    const numberDetails = await client.getNumberId(cleanNumber);
-    if (!numberDetails) {
-      throw new Error(`Number ${cleanNumber} is not registered on WhatsApp.`);
+    // Wrap in a 10s timeout to prevent CDP protocol calls from hanging indefinitely.
+    try {
+      const getNumberIdPromise = client.getNumberId(cleanNumber);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('getNumberId lookup timed out')), 10000)
+      );
+      const numberDetails = await Promise.race([getNumberIdPromise, timeoutPromise]);
+      if (numberDetails && numberDetails._serialized) {
+        chatId = numberDetails._serialized;
+      }
+    } catch (lookupErr) {
+      console.warn(`WhatsApp number lookup warning for ${cleanNumber}: ${lookupErr.message}. Falling back to direct chatId ${chatId}`);
     }
-
-    const chatId = numberDetails._serialized;
     
     // Instead of using MessageMedia (which is currently broken in this whatsapp-web.js version 
     // due to a Meta update), we simply append the image link to the text. 
@@ -123,7 +167,7 @@ async function sendMessage(number, text, imageUrl = null) {
 
     await client.sendMessage(chatId, finalPayload);
     
-    console.log(`Message sent to ${cleanNumber}`);
+    console.log(`Message successfully sent to ${cleanNumber} (${chatId})`);
     return true;
   } catch (error) {
     console.error(`Failed to send message to ${number}:`, error.message || error);
@@ -131,4 +175,4 @@ async function sendMessage(number, text, imageUrl = null) {
   }
 }
 
-module.exports = { initWhatsApp, sendMessage, getWhatsAppStatus };
+module.exports = { initWhatsApp, restartWhatsApp, sendMessage, getWhatsAppStatus, formatPhoneNumber };

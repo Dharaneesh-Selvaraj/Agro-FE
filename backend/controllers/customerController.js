@@ -76,24 +76,32 @@ exports.loginCustomer = async (req, res) => {
 };
 
 exports.notifyCustomers = async (req, res) => {
-  const { message, link, imageUrl } = req.body;
+  const { message, link, imageUrl, targetPhone } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'Message content is required.' });
   }
 
   try {
-    const pool = getPool();
-    const [customers] = await pool.query(`SELECT name, phone FROM customers`);
+    let targets = [];
 
-    if (customers.length === 0) {
-      return res.status(404).json({ message: 'No customers found to notify.' });
+    if (targetPhone && targetPhone.trim()) {
+      targets = [{ name: 'Customer', phone: targetPhone.trim() }];
+    } else {
+      const pool = getPool();
+      const [customers] = await pool.query(`SELECT name, phone FROM customers`);
+      targets = customers;
+    }
+
+    if (targets.length === 0) {
+      return res.status(404).json({ message: 'No recipients found to notify.' });
     }
 
     let successCount = 0;
     let failCount = 0;
+    const errors = [];
 
-    for (const customer of customers) {
+    for (const customer of targets) {
       let finalMessage = `Hello ${customer.name},\n\n${message}`;
       if (link) {
         finalMessage += `\n\nLink: ${link}`;
@@ -105,6 +113,7 @@ exports.notifyCustomers = async (req, res) => {
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (err) {
         console.error(`Failed to notify ${customer.phone}:`, err.message || err);
+        errors.push({ phone: customer.phone, error: err.message || 'Send failed' });
         failCount++;
       }
     }
@@ -112,10 +121,11 @@ exports.notifyCustomers = async (req, res) => {
     res.status(200).json({ 
       message: 'Notification process completed.', 
       success: successCount, 
-      failed: failCount 
+      failed: failCount,
+      errors: errors.length > 0 ? errors : undefined
     });
   } catch (error) {
     console.error("Error notifying customers:", error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: error.message || 'Server error' });
   }
 };

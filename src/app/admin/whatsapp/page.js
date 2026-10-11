@@ -11,15 +11,55 @@ export default function WhatsAppPromoPage() {
 
   const [promoMessage, setPromoMessage] = useState("");
   const [promoLink, setPromoLink] = useState("");
+  const [targetPhone, setTargetPhone] = useState("");
   const [imageFile, setImageFile] = useState(null);
   
   const [isSending, setIsSending] = useState(false);
+  const [isRestartingWa, setIsRestartingWa] = useState(false);
+  const [waStatus, setWaStatus] = useState("INITIALIZING");
+  const [waQr, setWaQr] = useState(null);
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
       router.push("/login");
     }
   }, [user, router]);
+
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api/whatsapp/status`);
+      if (res.ok) {
+        const data = await res.json();
+        setWaStatus(data.status);
+        setWaQr(data.qr);
+      }
+    } catch (err) {
+      console.error("Failed to fetch WhatsApp status", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRestartWhatsApp = async () => {
+    setIsRestartingWa(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api/whatsapp/restart`, {
+        method: "POST"
+      });
+      setWaStatus("INITIALIZING");
+      setWaQr(null);
+      setTimeout(fetchStatus, 2000);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to restart WhatsApp client.");
+    } finally {
+      setIsRestartingWa(false);
+    }
+  };
 
   if (!user || user.role !== "admin") return null;
 
@@ -64,15 +104,24 @@ export default function WhatsAppPromoPage() {
         body: JSON.stringify({ 
           message: promoMessage,
           link: promoLink,
-          imageUrl: uploadedImageUrl
+          imageUrl: uploadedImageUrl,
+          targetPhone: targetPhone ? targetPhone.trim() : undefined
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        alert(`Successfully sent messages to ${data.success} customers. Failed: ${data.failed}`);
+        let msg = `Successfully sent message to ${data.success} recipient(s).`;
+        if (data.failed > 0) {
+          msg += ` Failed: ${data.failed}.`;
+          if (data.errors && data.errors.length > 0) {
+            msg += ` Details: ${data.errors.map(e => `${e.phone}: ${e.error}`).join(", ")}`;
+          }
+        }
+        alert(msg);
         setPromoMessage("");
         setPromoLink("");
+        setTargetPhone("");
         setImageFile(null);
         const fileInput = document.getElementById('promoImage');
         if(fileInput) fileInput.value = "";
@@ -86,27 +135,6 @@ export default function WhatsAppPromoPage() {
       setIsSending(false);
     }
   };
-
-  const [waStatus, setWaStatus] = useState("INITIALIZING");
-  const [waQr, setWaQr] = useState(null);
-
-  useEffect(() => {
-    // Poll WhatsApp status every 3 seconds
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app"}/api/whatsapp/status`);
-        if (res.ok) {
-          const data = await res.json();
-          setWaStatus(data.status);
-          setWaQr(data.qr);
-        }
-      } catch (err) {
-        console.error("Failed to fetch WhatsApp status", err);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="container mx-auto px-6 py-10 min-h-screen">
@@ -125,9 +153,20 @@ export default function WhatsAppPromoPage() {
           
           {/* WhatsApp Connection Status Panel */}
           <div className="mb-8 p-6 rounded-2xl bg-white/50 dark:bg-black/30 border border-blue-200 dark:border-blue-800 shadow-inner">
-            <h3 className="text-xl font-bold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
-              📱 WhatsApp Connection Status
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                📱 WhatsApp Connection Status
+              </h3>
+              <button
+                type="button"
+                onClick={handleRestartWhatsApp}
+                disabled={isRestartingWa}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200 transition-colors"
+                title="Restart WhatsApp engine and get fresh QR code"
+              >
+                {isRestartingWa ? "Restarting..." : "🔄 Refresh / Restart QR"}
+              </button>
+            </div>
             
             {waQr && waStatus !== "READY" && waStatus !== "AUTHENTICATED" ? (
               <div className="flex flex-col items-center text-center">
@@ -143,7 +182,7 @@ export default function WhatsAppPromoPage() {
               </div>
             ) : waStatus === "DISCONNECTED" ? (
               <div className="flex items-center gap-3 text-red-600 font-bold">
-                <span className="text-3xl">❌</span> Disconnected. Restarting...
+                <span className="text-3xl">❌</span> Disconnected. Click Refresh above.
               </div>
             ) : (
               <div className="flex items-center gap-3 text-yellow-600 dark:text-yellow-400 font-semibold">
@@ -153,11 +192,30 @@ export default function WhatsAppPromoPage() {
           </div>
 
           <p className="text-blue-800 dark:text-blue-300 mb-8 font-medium text-lg border-b border-blue-200/50 pb-4">
-            Design a promotional message to send instantly to all registered customers.
+            Design a promotional message to send instantly to customers.
           </p>
           
           <form onSubmit={handleSendWhatsApp} className="space-y-6">
             
+            {/* Target Phone Number (Optional) */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-bold text-blue-900 dark:text-blue-200 ml-1">
+                  Recipient Phone (Optional)
+                </label>
+                <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  Leave empty to blast ALL customers
+                </span>
+              </div>
+              <input
+                type="tel"
+                value={targetPhone}
+                onChange={(e) => setTargetPhone(e.target.value)}
+                placeholder="e.g. 9790642068 (or leave empty for all)"
+                className="w-full px-5 py-4 rounded-2xl bg-white/50 dark:bg-black/20 border border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 outline-none transition font-medium text-blue-950 dark:text-white"
+              />
+            </div>
+
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-bold text-blue-900 dark:text-blue-200 mb-2 ml-1">Promotional Image (Optional)</label>
@@ -214,7 +272,11 @@ export default function WhatsAppPromoPage() {
             >
               {isSending ? (
                 <>
-                  <span className="animate-spin text-2xl">⏳</span> Sending to Database...
+                  <span className="animate-spin text-2xl">⏳</span> Sending Message...
+                </>
+              ) : targetPhone ? (
+                <>
+                  <span className="text-2xl">📲</span> Send Message to {targetPhone}
                 </>
               ) : (
                 <>

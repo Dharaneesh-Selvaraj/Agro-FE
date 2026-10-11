@@ -27,6 +27,16 @@ app.get('/api/whatsapp/status', (req, res) => {
   res.status(200).json(getWhatsAppStatus());
 });
 
+app.post('/api/whatsapp/restart', async (req, res) => {
+  const { restartWhatsApp } = require('./services/whatsapp');
+  try {
+    await restartWhatsApp();
+    res.status(200).json({ message: 'WhatsApp client restarting...' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Initialize Database and Services, then start server
 async function startServer() {
   console.log("Starting server initialization...");
