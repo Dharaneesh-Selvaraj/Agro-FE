@@ -1,4 +1,28 @@
 const { getPool } = require('../config/db');
+const fs = require('fs');
+const path = require('path');
+
+// Seed products from seed.sql
+exports.seedProducts = async (req, res) => {
+  try {
+    const pool = getPool();
+    const sqlFile = path.join(__dirname, '..', 'seed.sql');
+    if (!fs.existsSync(sqlFile)) {
+      return res.status(404).json({ error: 'seed.sql file not found on server.' });
+    }
+    const sqlContent = fs.readFileSync(sqlFile, 'utf8');
+    await pool.query(sqlContent);
+    const [countRows] = await pool.query('SELECT COUNT(*) AS count FROM products');
+    res.status(200).json({ 
+      success: true, 
+      message: `Successfully seeded ${countRows[0].count} products into MySQL!`, 
+      count: countRows[0].count 
+    });
+  } catch (error) {
+    console.error('Error seeding products:', error);
+    res.status(500).json({ error: 'Failed to seed products: ' + (error.message || error) });
+  }
+};
 
 // Get all products
 exports.getProducts = async (req, res) => {

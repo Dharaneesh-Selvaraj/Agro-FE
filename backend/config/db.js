@@ -25,7 +25,8 @@ async function initDB() {
       database: dbName,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0
+      queueLimit: 0,
+      multipleStatements: true
     });
 
     // 3. Create customers table
@@ -60,6 +61,24 @@ async function initDB() {
     `;
     await pool.query(createProductsTable);
     console.log("Products table ensured.");
+
+    // 5. Auto-seed products if table is empty
+    const [countRows] = await pool.query("SELECT COUNT(*) AS count FROM products");
+    if (countRows[0].count === 0) {
+      console.log("Products table is empty. Auto-seeding from seed.sql...");
+      const fs = require('fs');
+      const path = require('path');
+      const sqlFile = path.join(__dirname, '..', 'seed.sql');
+      if (fs.existsSync(sqlFile)) {
+        const sqlContent = fs.readFileSync(sqlFile, 'utf8');
+        await pool.query(sqlContent);
+        console.log("Successfully seeded 147 products into MySQL!");
+      } else {
+        console.warn("seed.sql file not found at", sqlFile);
+      }
+    } else {
+      console.log(`Database already has ${countRows[0].count} products.`);
+    }
     
     return pool;
   } catch (error) {
