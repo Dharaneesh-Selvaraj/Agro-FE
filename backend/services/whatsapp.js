@@ -186,4 +186,31 @@ async function sendMessage(number, text, imageUrl = null) {
   }
 }
 
-module.exports = { initWhatsApp, restartWhatsApp, sendMessage, getWhatsAppStatus, formatPhoneNumber };
+/**
+ * Checks if a specific phone number is registered on WhatsApp
+ * @param {string} number - The phone number (e.g., '919876543210' or '9876543210')
+ * @returns {Promise<{ exists: boolean, cleanNumber: string, jid: string }>}
+ */
+async function checkIsWhatsApp(number) {
+  if (!sock || !isReady) {
+    throw new Error('WhatsApp client is not connected. Please wait a moment or scan the QR code.');
+  }
+
+  const cleanNumber = formatPhoneNumber(number);
+  const jid = `${cleanNumber}@s.whatsapp.net`;
+
+  try {
+    const results = await sock.onWhatsApp(jid);
+    if (!results || results.length === 0) {
+      return { exists: false, cleanNumber, jid };
+    }
+    const match = results.find(r => r.exists);
+    return { exists: !!match, cleanNumber, jid: match?.jid || jid };
+  } catch (error) {
+    console.error(`[Baileys] Error checking onWhatsApp for ${number}:`, error.message || error);
+    return { exists: null, cleanNumber, jid, error: error.message };
+  }
+}
+
+module.exports = { initWhatsApp, restartWhatsApp, sendMessage, getWhatsAppStatus, formatPhoneNumber, checkIsWhatsApp };
+

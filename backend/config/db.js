@@ -34,13 +34,26 @@ async function initDB() {
       CREATE TABLE IF NOT EXISTS customers (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
+        email VARCHAR(255) NULL,
         phone VARCHAR(50) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NULL,
+        is_verified TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await pool.query(createCustomersTable);
+
+    // Apply safe migrations for existing tables
+    try {
+      await pool.query("ALTER TABLE customers MODIFY COLUMN password VARCHAR(255) NULL;");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE customers MODIFY COLUMN email VARCHAR(255) NULL;");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE customers ADD COLUMN is_verified TINYINT(1) DEFAULT 1;");
+    } catch (e) {}
+
     console.log("Customers table ensured.");
 
     // 4. Create products table

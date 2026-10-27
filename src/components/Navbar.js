@@ -57,9 +57,9 @@ export default function Navbar() {
         ) : (
           <Link
             href="/login"
-            className="bg-green-500 hover:bg-green-400 text-white dark:text-green-950 px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all transform hover:scale-105 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]"
+            className="bg-[#25D366] hover:bg-[#20ba59] text-white px-6 py-2.5 rounded-full font-bold text-sm tracking-wider transition-all transform hover:scale-105 hover:shadow-[0_0_20px_rgba(37,211,102,0.4)] flex items-center gap-2"
           >
-            Sign In
+            <span>💬</span> WhatsApp Sign In
           </Link>
         )}
       </div>
