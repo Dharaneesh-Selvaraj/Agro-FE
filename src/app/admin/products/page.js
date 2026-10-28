@@ -24,11 +24,28 @@ export default function AdminProductsPage() {
 
   return (
     <div className="container mx-auto px-6 py-10 min-h-screen">
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/admin" className="text-green-600 hover:text-green-800 font-bold bg-green-50 hover:bg-green-100 p-3 rounded-full transition-colors">
-          ← Back to Dashboard
-        </Link>
-        <h1 className="text-4xl font-extrabold text-green-950 dark:text-white tracking-tight">Manage Products</h1>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin" className="text-green-600 hover:text-green-800 font-bold bg-green-50 hover:bg-green-100 p-3 rounded-full transition-colors">
+            ← Back to Dashboard
+          </Link>
+          <h1 className="text-4xl font-extrabold text-green-950 dark:text-white tracking-tight">Manage Products</h1>
+        </div>
+        <div className="flex gap-3">
+          <Link 
+            href="/admin/customers" 
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all text-sm flex items-center gap-2"
+          >
+            <span>👥 Customers</span>
+          </Link>
+          <Link 
+            href="/admin/whatsapp" 
+            style={{ backgroundColor: '#25D366' }}
+            className="hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all text-sm flex items-center gap-2"
+          >
+            <span>📱 WhatsApp</span>
+          </Link>
+        </div>
       </div>
 
       <div className="glass-modern p-10 rounded-[2.5rem] shadow-xl">

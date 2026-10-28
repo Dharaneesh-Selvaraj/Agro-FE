@@ -110,7 +110,13 @@ function AdminForm() {
     <div className="container mx-auto px-6 py-10 min-h-screen max-w-4xl">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <h1 className="text-4xl font-extrabold text-green-950 dark:text-white tracking-tight">Admin Dashboard</h1>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
+          <Link 
+            href="/admin/customers"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all flex items-center gap-2"
+          >
+            <span>👥 Customers & Bulk Upload</span>
+          </Link>
           <Link 
             href="/admin/products"
             className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all flex items-center gap-2"

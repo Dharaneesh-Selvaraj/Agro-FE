@@ -276,3 +276,112 @@ exports.notifyCustomers = async (req, res) => {
     res.status(500).json({ error: error.message || 'Server error' });
   }
 };
+
+// GET /api/customers - Retrieve all customers
+exports.getAllCustomers = async (req, res) => {
+  try {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      'SELECT id, name, phone, email, is_verified, created_at FROM customers ORDER BY id DESC'
+    );
+    res.status(200).json({ success: true, count: rows.length, customers: rows });
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({ error: 'Server error while fetching customers' });
+  }
+};
+
+// POST /api/customers/bulk-upload - Bulk upload customers
+exports.bulkUploadCustomers = async (req, res) => {
+  const { customers } = req.body;
+
+  if (!Array.isArray(customers) || customers.length === 0) {
+    return res.status(400).json({ error: 'No customer data provided. Expecting an array of customers.' });
+  }
+
+  try {
+    const pool = getPool();
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (let i = 0; i < customers.length; i++) {
+      const item = customers[i] || {};
+      const rawPhone = String(item.phone || item.mobile || item.contact || item.number || '').trim();
+      const rawName = String(item.name || item.customerName || item.fullName || '').trim() || 'Valued Customer';
+      const rawEmail = item.email && String(item.email).trim() ? String(item.email).trim() : null;
+
+      const cleanPhone = whatsappService.formatPhoneNumber(rawPhone);
+
+      // Validate length: clean phone should be between 10 and 15 digits
+      if (!cleanPhone || cleanPhone.length < 10 || cleanPhone.length > 15) {
+        skipped++;
+        errors.push({
+          row: i + 1,
+          name: rawName,
+          phone: rawPhone || '(empty)',
+          reason: 'Invalid phone number format'
+        });
+        continue;
+      }
+
+      try {
+        const query = `
+          INSERT INTO customers (name, phone, email, is_verified)
+          VALUES (?, ?, ?, 1)
+          ON DUPLICATE KEY UPDATE
+            name = COALESCE(NULLIF(VALUES(name), ''), name),
+            email = COALESCE(VALUES(email), email);
+        `;
+        const [result] = await pool.query(query, [rawName, cleanPhone, rawEmail]);
+
+        if (result.affectedRows === 1) {
+          inserted++;
+        } else {
+          updated++;
+        }
+      } catch (err) {
+        skipped++;
+        errors.push({
+          row: i + 1,
+          name: rawName,
+          phone: cleanPhone,
+          reason: err.message
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Bulk upload processed. Added: ${inserted}, Updated: ${updated}, Skipped: ${skipped}`,
+      stats: {
+        total: customers.length,
+        inserted,
+        updated,
+        skipped
+      },
+      errors: errors.length > 0 ? errors.slice(0, 50) : []
+    });
+  } catch (error) {
+    console.error('Error during bulkUploadCustomers:', error);
+    res.status(500).json({ error: error.message || 'Server error during bulk upload' });
+  }
+};
+
+// DELETE /api/customers/:id - Delete single customer
+exports.deleteCustomer = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = getPool();
+    const [result] = await pool.query('DELETE FROM customers WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+    res.status(200).json({ success: true, message: 'Customer deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    res.status(500).json({ error: 'Server error while deleting customer' });
+  }
+};
+

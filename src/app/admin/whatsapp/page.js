@@ -143,11 +143,19 @@ export default function WhatsAppPromoPage() {
   return (
     <div className="container mx-auto px-6 py-10 min-h-screen">
       
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/admin" className="text-blue-600 hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 p-3 rounded-full transition-colors">
-          ← Back
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin" className="text-blue-600 hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 p-3 rounded-full transition-colors">
+            ← Back
+          </Link>
+          <h1 className="text-4xl font-extrabold text-blue-950 dark:text-blue-100 tracking-tight">WhatsApp Promo Studio</h1>
+        </div>
+        <Link 
+          href="/admin/customers"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-full shadow-md transition-all flex items-center gap-2 text-sm"
+        >
+          <span>👥 Manage & Bulk Upload Customers</span>
         </Link>
-        <h1 className="text-4xl font-extrabold text-blue-950 dark:text-blue-100 tracking-tight">WhatsApp Promo Studio</h1>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12 justify-center items-start">
