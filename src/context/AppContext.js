@@ -158,7 +158,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, editFertilizer, deleteFertilizer }}>
+    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, editFertilizer, deleteFertilizer, fetchProducts }}>
       {children}
     </AppContext.Provider>
   );

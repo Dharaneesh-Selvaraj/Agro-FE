@@ -73,6 +73,9 @@ async function initDB() {
       );
     `;
     await pool.query(createProductsTable);
+    try {
+      await pool.query("ALTER TABLE products MODIFY COLUMN image TEXT;");
+    } catch (e) {}
     console.log("Products table ensured.");
 
     // 5. Auto-seed products if table is empty

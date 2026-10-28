@@ -121,7 +121,7 @@ function AdminForm() {
             href="/admin/products"
             className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all flex items-center gap-2"
           >
-            <span>📦 Manage Products</span>
+            <span>📦 Products & Bulk Upload</span>
           </Link>
           <Link 
             href="/admin/whatsapp"

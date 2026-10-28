@@ -8,6 +8,9 @@ router.get('/seed', productController.seedProducts);
 // GET /api/products
 router.get('/', productController.getProducts);
 
+// POST /api/products/bulk-upload
+router.post('/bulk-upload', productController.bulkUploadProducts);
+
 // POST /api/products
 router.post('/', productController.addProduct);
 

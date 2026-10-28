@@ -156,3 +156,101 @@ exports.updateProduct = async (req, res) => {
     res.status(500).json({ error: 'Server error updating product.' });
   }
 };
+
+// POST /api/products/bulk-upload - Bulk upload products from Excel/JSON
+exports.bulkUploadProducts = async (req, res) => {
+  const { products } = req.body;
+
+  if (!Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ error: 'No product data provided. Expecting an array of products.' });
+  }
+
+  try {
+    const pool = getPool();
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const p = products[i] || {};
+      const name = String(p.name || p.productName || p.title || '').trim();
+
+      if (!name) {
+        skipped++;
+        errors.push({ row: i + 1, reason: 'Product name is required' });
+        continue;
+      }
+
+      // Parse price
+      let cleanPrice = String(p.price || '').replace(/[^\d.]/g, '');
+      const price = isNaN(parseFloat(cleanPrice)) ? 0 : parseFloat(cleanPrice);
+
+      const category = String(p.category || 'General').trim() || 'General';
+      const subCategory = String(p.subCategory || p.subcategory || 'General').trim() || 'General';
+      const description = String(p.description || p.desc || '').trim();
+      const image = String(p.image || p.imageUrl || p.imageLink || p.image_url || '').trim() ||
+        `https://placehold.co/400x600/e2e8f0/1e293b.png?text=${encodeURIComponent(name.slice(0, 20))}`;
+
+      // Process tags
+      let tags = [];
+      if (Array.isArray(p.tags)) {
+        tags = p.tags;
+      } else if (typeof p.tags === 'string' && p.tags.trim()) {
+        try {
+          const parsed = JSON.parse(p.tags);
+          if (Array.isArray(parsed)) tags = parsed;
+          else tags = [p.tags];
+        } catch {
+          tags = p.tags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+      }
+      if (tags.length === 0) {
+        tags = [category, subCategory].filter(t => t && t.toLowerCase() !== 'general');
+      }
+      const tagsJson = JSON.stringify(tags);
+
+      try {
+        // Check if product with this exact name already exists
+        const [existing] = await pool.query('SELECT id FROM products WHERE name = ?', [name]);
+
+        if (existing.length > 0) {
+          const updateQuery = `
+            UPDATE products 
+            SET price = ?, category = ?, subCategory = ?, description = ?, image = ?, tags = ?
+            WHERE id = ?
+          `;
+          await pool.query(updateQuery, [price, category, subCategory, description, image, tagsJson, existing[0].id]);
+          updated++;
+        } else {
+          const insertQuery = `
+            INSERT INTO products (name, price, category, subCategory, description, image, tags, rating, reviews)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 4.5, 12)
+          `;
+          await pool.query(insertQuery, [name, price, category, subCategory, description, image, tagsJson]);
+          inserted++;
+        }
+      } catch (err) {
+        console.error(`Error saving product row ${i + 1} (${name}):`, err);
+        skipped++;
+        errors.push({ row: i + 1, name, reason: err.message });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Processed ${products.length} product(s).`,
+      stats: {
+        total: products.length,
+        inserted,
+        updated,
+        skipped,
+      },
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (error) {
+    console.error('Error during bulk product upload:', error);
+    res.status(500).json({ error: error.message || 'Server error during bulk upload.' });
+  }
+};
+
