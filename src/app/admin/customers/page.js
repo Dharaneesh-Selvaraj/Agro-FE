@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
 import Link from "next/link";
+import * as XLSX from "xlsx";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app";
 
@@ -30,7 +31,6 @@ export default function CustomersAdminPage() {
   // Single Customer State
   const [singleName, setSingleName] = useState("");
   const [singlePhone, setSinglePhone] = useState("");
-  const [singleEmail, setSingleEmail] = useState("");
   const [isSavingSingle, setIsSavingSingle] = useState(false);
 
   useEffect(() => {
@@ -65,12 +65,11 @@ export default function CustomersAdminPage() {
     return customers.filter(
       (c) =>
         (c.name && c.name.toLowerCase().includes(q)) ||
-        (c.phone && c.phone.includes(q)) ||
-        (c.email && c.email.toLowerCase().includes(q))
+        (c.phone && c.phone.includes(q))
     );
   }, [customers, search]);
 
-  // Clean phone number helper
+  // Clean phone number helper to international format
   const cleanPhone = (val) => {
     let digits = String(val || "").replace(/\D/g, "");
     if (digits.length === 11 && digits.startsWith("0")) {
@@ -81,7 +80,145 @@ export default function CustomersAdminPage() {
     return digits;
   };
 
-  // Parse raw lines or CSV into structured objects
+  // Parse Excel 2D rows into customer list
+  const parseExcelRows = (rawRows) => {
+    if (!rawRows || rawRows.length === 0) {
+      setParsedRows([]);
+      return;
+    }
+
+    // Filter out rows that are completely empty
+    const rows = rawRows.filter(
+      (r) =>
+        Array.isArray(r) &&
+        r.some((cell) => cell !== undefined && cell !== null && String(cell).trim() !== "")
+    );
+
+    if (rows.length === 0) {
+      setParsedRows([]);
+      return;
+    }
+
+    let startIndex = 0;
+    let nameCol = -1;
+    let phoneCol = -1;
+
+    // Check if row 0 is a header
+    const firstRow = rows[0].map((c) => String(c || "").trim().toLowerCase());
+    const hasHeader = firstRow.some(
+      (c) =>
+        c.includes("name") ||
+        c.includes("phone") ||
+        c.includes("mobile") ||
+        c.includes("contact") ||
+        c.includes("number") ||
+        c.includes("customer")
+    );
+
+    if (hasHeader) {
+      startIndex = 1;
+      firstRow.forEach((h, idx) => {
+        if (nameCol === -1 && (h.includes("name") || h.includes("customer"))) {
+          nameCol = idx;
+        }
+        if (
+          phoneCol === -1 &&
+          (h.includes("phone") || h.includes("mobile") || h.includes("contact") || h.includes("number"))
+        ) {
+          phoneCol = idx;
+        }
+      });
+    }
+
+    // Fallbacks if columns are not named explicitly
+    if (nameCol === -1 && phoneCol === -1) {
+      if (rows[startIndex] && rows[startIndex].length >= 2) {
+        const cell0Digits = String(rows[startIndex][0] || "").replace(/\D/g, "");
+        const cell1Digits = String(rows[startIndex][1] || "").replace(/\D/g, "");
+        if (cell0Digits.length >= 7 && cell1Digits.length < 7) {
+          phoneCol = 0;
+          nameCol = 1;
+        } else {
+          nameCol = 0;
+          phoneCol = 1;
+        }
+      } else {
+        nameCol = 0;
+        phoneCol = 0;
+      }
+    } else if (nameCol === -1) {
+      nameCol = phoneCol === 0 ? 1 : 0;
+    } else if (phoneCol === -1) {
+      phoneCol = nameCol === 0 ? 1 : 0;
+    }
+
+    const dataRows = rows.slice(startIndex);
+    const parsed = dataRows.map((row, idx) => {
+      let name = String(row[nameCol] !== undefined && row[nameCol] !== null ? row[nameCol] : "").trim();
+      let phone = String(row[phoneCol] !== undefined && row[phoneCol] !== null ? row[phoneCol] : "").trim();
+
+      // If only phone was provided in the row
+      if (!name && phone) {
+        name = "Valued Customer";
+      } else if (name && !phone) {
+        const digits = name.replace(/\D/g, "");
+        if (digits.length >= 10) {
+          phone = name;
+          name = "Valued Customer";
+        }
+      } else if (/^\d{10,15}$/.test(name.replace(/\D/g, "")) && !/\d{5,}/.test(phone)) {
+        // Swap if name contains phone digits and phone has name string
+        const temp = name;
+        name = phone || "Valued Customer";
+        phone = temp;
+      }
+
+      const formatted = cleanPhone(phone);
+      const isValid = formatted.length >= 10 && formatted.length <= 15;
+
+      return {
+        id: idx + 1,
+        name: name || "Valued Customer",
+        phone: formatted || phone,
+        rawPhone: phone,
+        isValid,
+        reason: isValid ? "Valid WhatsApp candidate" : "Phone must be at least 10 digits",
+      };
+    });
+
+    setParsedRows(parsed);
+  };
+
+  // Handle Excel file selection (.xlsx, .xls)
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    setFileName(file.name);
+    setUploadStats(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) {
+          alert("The Excel file has no worksheets.");
+          return;
+        }
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        parseExcelRows(rows);
+      } catch (err) {
+        console.error("Excel parse error:", err);
+        alert("Could not read this Excel file. Please ensure it is a valid .xlsx or .xls file.");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Parse raw text paste (Name, Phone per line)
   const parseCustomerData = (text) => {
     if (!text || !text.trim()) {
       setParsedRows([]);
@@ -98,7 +235,6 @@ export default function CustomersAdminPage() {
       return;
     }
 
-    // Check if first line is a header
     const firstLineLower = lines[0].toLowerCase();
     const hasHeader =
       firstLineLower.includes("name") ||
@@ -109,19 +245,15 @@ export default function CustomersAdminPage() {
     const dataLines = hasHeader ? lines.slice(1) : lines;
 
     const parsed = dataLines.map((line, idx) => {
-      // Split by comma, tab, or semicolon
       const parts = line.split(/[,\t;]/).map((p) => p.trim());
 
       let name = "";
       let phone = "";
-      let email = "";
 
       if (parts.length === 1) {
-        // Just a phone number or name
         phone = parts[0];
         name = "Valued Customer";
-      } else if (parts.length === 2) {
-        // Either Name, Phone OR Phone, Name
+      } else {
         if (/\d{7,}/.test(parts[0])) {
           phone = parts[0];
           name = parts[1] || "Valued Customer";
@@ -129,11 +261,6 @@ export default function CustomersAdminPage() {
           name = parts[0] || "Valued Customer";
           phone = parts[1];
         }
-      } else {
-        // 3+ columns: Name, Phone, Email
-        name = parts[0] || "Valued Customer";
-        phone = parts[1];
-        email = parts[2] || "";
       }
 
       const formatted = cleanPhone(phone);
@@ -144,7 +271,6 @@ export default function CustomersAdminPage() {
         name: name || "Valued Customer",
         phone: formatted || phone,
         rawPhone: phone,
-        email: email || "",
         isValid,
         reason: isValid ? "Valid WhatsApp candidate" : "Phone must be at least 10 digits",
       };
@@ -153,23 +279,6 @@ export default function CustomersAdminPage() {
     setParsedRows(parsed);
   };
 
-  // Handle file selection (CSV/TXT)
-  const handleFileChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-
-    setFileName(file.name);
-    setUploadStats(null);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target.result;
-      parseCustomerData(content);
-    };
-    reader.readAsText(file);
-  };
-
-  // Handle text paste input
   const handlePasteChange = (e) => {
     const val = e.target.value;
     setPastedText(val);
@@ -177,7 +286,7 @@ export default function CustomersAdminPage() {
     parseCustomerData(val);
   };
 
-  // Execute bulk upload
+  // Execute bulk upload to backend
   const handleConfirmBulkUpload = async () => {
     const validCandidates = parsedRows.filter((r) => r.isValid);
     if (validCandidates.length === 0) {
@@ -192,7 +301,6 @@ export default function CustomersAdminPage() {
       const payload = validCandidates.map((r) => ({
         name: r.name,
         phone: r.phone,
-        email: r.email || null,
       }));
 
       const res = await fetch(`${API_BASE}/api/customers/bulk-upload`, {
@@ -229,7 +337,6 @@ export default function CustomersAdminPage() {
         body: JSON.stringify({
           name: singleName.trim() || "Valued Customer",
           phone: singlePhone.trim(),
-          email: singleEmail.trim() || null,
         }),
       });
 
@@ -238,7 +345,6 @@ export default function CustomersAdminPage() {
         alert("Customer saved successfully!");
         setSingleName("");
         setSinglePhone("");
-        setSingleEmail("");
         setShowSingleModal(false);
         fetchCustomers();
       } else {
@@ -271,46 +377,45 @@ export default function CustomersAdminPage() {
     }
   };
 
-  // Download Sample CSV
-  const downloadSampleCsv = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8,Name,Phone,Email\n" +
-      "Ramesh Kumar,9876543210,ramesh@example.com\n" +
-      "Suresh Patel,9823456789,\n" +
-      "Venkatesh S,919790642068,venkat@agro.com\n" +
-      "Kavitha Farmer,9688226761,kavitha@example.com\n";
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "customer_upload_template.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Download Sample Excel Template (.xlsx) with 3 mock data rows
+  const downloadSampleExcel = () => {
+    const templateData = [
+      ["Name", "Phone"],
+      ["Ramesh Kumar", "9876543210"],
+      ["Suresh Patel", "9845612345"],
+      ["Kavitha Selvam", "9688226761"],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    // Set column widths for optimal display
+    ws["!cols"] = [{ wch: 22 }, { wch: 18 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Customers");
+    XLSX.writeFile(wb, "customer_upload_template.xlsx");
   };
 
-  // Export All Customers to CSV
-  const exportAllCustomersCsv = () => {
+  // Export All Customers to Excel (.xlsx)
+  const exportAllCustomersExcel = () => {
     if (customers.length === 0) {
       alert("No customers in database to export.");
       return;
     }
 
-    const header = "ID,Name,Phone,Email,Date Added\n";
-    const rows = customers
-      .map(
-        (c) =>
-          `"${c.id}","${(c.name || "").replace(/"/g, '""')}","${c.phone || ""}","${(c.email || "").replace(/"/g, '""')}","${new Date(c.created_at).toLocaleDateString()}"`
-      )
-      .join("\n");
+    const exportData = customers.map((c, idx) => ({
+      "S.No": idx + 1,
+      "Customer Name": c.name || "Valued Customer",
+      "WhatsApp Phone": `+${c.phone}`,
+      "Status": c.is_verified ? "Verified" : "Active",
+      "Date Added": new Date(c.created_at).toLocaleDateString(),
+    }));
 
-    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `customers_export_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    ws["!cols"] = [{ wch: 8 }, { wch: 26 }, { wch: 20 }, { wch: 14 }, { wch: 16 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Customers");
+    XLSX.writeFile(wb, `customers_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   if (!user || user.role !== "admin") return null;
@@ -331,7 +436,7 @@ export default function CustomersAdminPage() {
               Customer Database
             </h1>
             <p className="text-sm font-medium text-green-800 dark:text-green-300">
-              Manage contacts and upload customer lists in bulk for WhatsApp campaigns.
+              Manage contacts and bulk upload Excel files for WhatsApp campaigns.
             </p>
           </div>
         </div>
@@ -378,7 +483,7 @@ export default function CustomersAdminPage() {
               {loading ? "..." : customers.filter((c) => c.is_verified).length}
             </div>
             <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              WhatsApp Verified
+              WhatsApp Active
             </div>
           </div>
         </div>
@@ -391,10 +496,10 @@ export default function CustomersAdminPage() {
           }}
           className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white p-6 rounded-3xl shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 text-left"
         >
-          <span className="text-3xl">📥</span>
+          <span className="text-3xl">📊</span>
           <div>
             <div className="font-extrabold text-lg">Bulk Upload</div>
-            <div className="text-xs text-emerald-100 font-medium">CSV, Excel, or Text list</div>
+            <div className="text-xs text-emerald-100 font-medium">Excel (.xlsx, .xls) file</div>
           </div>
         </button>
 
@@ -406,7 +511,7 @@ export default function CustomersAdminPage() {
           <span className="text-3xl">➕</span>
           <div>
             <div className="font-extrabold text-lg">Add Single Contact</div>
-            <div className="text-xs text-blue-100 font-medium">Quick entry</div>
+            <div className="text-xs text-blue-100 font-medium">Quick entry (Name & Phone)</div>
           </div>
         </button>
       </div>
@@ -421,19 +526,19 @@ export default function CustomersAdminPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, phone, or email..."
+              placeholder="Search by customer name or phone..."
               className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white/60 dark:bg-black/30 border border-green-200 dark:border-green-800 text-sm focus:border-green-500 outline-none transition text-green-950 dark:text-white"
             />
           </div>
 
-          {/* Export to CSV */}
+          {/* Export to Excel */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-end">
             <button
-              onClick={exportAllCustomersCsv}
-              className="text-xs font-bold px-4 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors flex items-center gap-2"
-              title="Download customer database as CSV"
+              onClick={exportAllCustomersExcel}
+              className="text-xs font-bold px-4 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 transition-colors flex items-center gap-2 border border-emerald-200 dark:border-emerald-800"
+              title="Download customer database as Excel workbook (.xlsx)"
             >
-              <span>💾</span> Export All to CSV
+              <span>📊</span> Export to Excel (.xlsx)
             </button>
           </div>
         </div>
@@ -446,7 +551,6 @@ export default function CustomersAdminPage() {
                 <th className="py-4 px-6">#</th>
                 <th className="py-4 px-6">Customer Name</th>
                 <th className="py-4 px-6">WhatsApp Phone</th>
-                <th className="py-4 px-6">Email</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6">Added On</th>
                 <th className="py-4 px-6 text-right">Actions</th>
@@ -455,19 +559,19 @@ export default function CustomersAdminPage() {
             <tbody className="divide-y divide-green-100/50 dark:divide-green-900/30">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-500 font-medium">
+                  <td colSpan={6} className="text-center py-12 text-gray-500 font-medium">
                     Loading customer contacts...
                   </td>
                 </tr>
               ) : filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16 text-gray-500">
+                  <td colSpan={6} className="text-center py-16 text-gray-500">
                     <div className="text-4xl mb-2">👥</div>
                     <div className="font-bold text-base text-gray-700 dark:text-gray-300">
                       {search ? "No matching contacts found" : "No customers stored yet"}
                     </div>
                     <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
-                      Use the <strong>Bulk Upload</strong> button above to import your customer lists from CSV or Excel.
+                      Use the <strong>Bulk Upload</strong> button above to import your customer list from an Excel (.xlsx) file.
                     </p>
                   </td>
                 </tr>
@@ -479,7 +583,7 @@ export default function CustomersAdminPage() {
                   >
                     <td className="py-4 px-6 text-gray-400 text-xs">{index + 1}</td>
                     <td className="py-4 px-6 font-bold text-green-950 dark:text-white flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-full bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 flex items-center justify-center text-xs font-extrabold">
+                      <span className="w-8 h-8 rounded-full bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 flex items-center justify-center text-xs font-extrabold shadow-sm">
                         {(c.name || "C").charAt(0).toUpperCase()}
                       </span>
                       {c.name || "Valued Customer"}
@@ -489,14 +593,11 @@ export default function CustomersAdminPage() {
                         href={`https://wa.me/${c.phone}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#25D366] hover:underline flex items-center gap-1.5"
+                        className="text-[#25D366] hover:underline flex items-center gap-1.5 font-mono"
                         title="Chat on WhatsApp"
                       >
                         <span>💬</span> +{c.phone}
                       </a>
-                    </td>
-                    <td className="py-4 px-6 text-gray-600 dark:text-gray-400 text-xs">
-                      {c.email || "—"}
                     </td>
                     <td className="py-4 px-6">
                       <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -530,10 +631,10 @@ export default function CustomersAdminPage() {
             <div className="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-neutral-800 pb-4">
               <div>
                 <h3 className="text-2xl font-extrabold text-green-950 dark:text-white flex items-center gap-2">
-                  <span>📥</span> Bulk Upload Customers
+                  <span>📊</span> Bulk Upload Customers (Excel)
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  Upload CSV files or paste customer names & phone numbers directly.
+                  Upload an Excel spreadsheet (.xlsx, .xls) with customer names and WhatsApp phone numbers.
                 </p>
               </div>
               <button
@@ -555,7 +656,7 @@ export default function CustomersAdminPage() {
                     : "text-gray-500 hover:text-gray-800"
                 }`}
               >
-                📁 Upload CSV / File
+                📊 Upload Excel File (.xlsx)
               </button>
               <button
                 type="button"
@@ -570,39 +671,39 @@ export default function CustomersAdminPage() {
               </button>
             </div>
 
-            {/* Tab 1: File Upload */}
+            {/* Tab 1: Excel File Upload */}
             {bulkTab === "file" ? (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-green-300 dark:border-green-800 rounded-3xl p-8 text-center bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 transition-colors">
+                <div className="border-2 border-dashed border-emerald-300 dark:border-emerald-800 rounded-3xl p-8 text-center bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-50/70 transition-colors">
                   <input
                     type="file"
-                    id="csvFileInput"
-                    accept=".csv, .txt, text/plain, text/csv"
+                    id="excelFileInput"
+                    accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     onChange={handleFileChange}
                     className="hidden"
                   />
                   <label
-                    htmlFor="csvFileInput"
+                    htmlFor="excelFileInput"
                     className="cursor-pointer flex flex-col items-center justify-center gap-2"
                   >
-                    <span className="text-5xl">📄</span>
+                    <span className="text-5xl">📊</span>
                     <span className="font-extrabold text-green-950 dark:text-white text-base">
-                      {fileName ? fileName : "Click to select CSV file, or drag and drop"}
+                      {fileName ? fileName : "Click to select Excel file (.xlsx, .xls), or drag and drop"}
                     </span>
                     <span className="text-xs text-gray-500 font-medium">
-                      Supports .csv or .txt (comma or tab-separated)
+                      Requires columns: <strong>Name</strong> and <strong>Phone</strong> (no email required)
                     </span>
                   </label>
                 </div>
 
-                <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
-                  <span>Need help formatting your columns?</span>
+                <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 pt-1 gap-2">
+                  <span>Need an formatted template with mock sample data?</span>
                   <button
                     type="button"
-                    onClick={downloadSampleCsv}
-                    className="text-green-700 dark:text-green-400 font-bold hover:underline flex items-center gap-1"
+                    onClick={downloadSampleExcel}
+                    className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800"
                   >
-                    <span>📥</span> Download Sample CSV Template
+                    <span>📥</span> Download Excel Template (.xlsx)
                   </button>
                 </div>
               </div>
@@ -616,11 +717,11 @@ export default function CustomersAdminPage() {
                   rows={6}
                   value={pastedText}
                   onChange={handlePasteChange}
-                  placeholder={`Ramesh Kumar, 9876543210\nSuresh Patel, 9823456789\n919790642068\nKavitha, 9688226761, kavitha@agro.com`}
+                  placeholder={`Ramesh Kumar, 9876543210\nSuresh Patel, 9845612345\nKavitha Selvam, 9688226761`}
                   className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-sm font-mono focus:border-green-500 outline-none text-green-950 dark:text-white"
                 ></textarea>
                 <p className="text-xs text-gray-400">
-                  Each line can be <code>Name, Phone</code>, or just a list of 10-digit mobile numbers.
+                  Each line can be <code>Name, Phone</code> or just a list of 10-digit mobile numbers.
                 </p>
               </div>
             )}
@@ -630,7 +731,7 @@ export default function CustomersAdminPage() {
               <div className="mt-6 border-t border-gray-100 dark:border-neutral-800 pt-4">
                 <div className="flex justify-between items-center mb-3">
                   <div className="font-bold text-sm text-green-950 dark:text-white">
-                    Preview: {parsedRows.length} contacts found
+                    Preview: {parsedRows.length} contacts found in sheet
                   </div>
                   <div className="flex gap-2 text-xs font-bold">
                     <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full">
@@ -648,23 +749,23 @@ export default function CustomersAdminPage() {
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-400 font-bold sticky top-0">
                       <tr>
-                        <th className="p-2.5 pl-4">Name</th>
-                        <th className="p-2.5">Formatted Phone</th>
-                        <th className="p-2.5">Email</th>
+                        <th className="p-2.5 pl-4">#</th>
+                        <th className="p-2.5">Customer Name</th>
+                        <th className="p-2.5">Formatted WhatsApp Phone</th>
                         <th className="p-2.5">Validation</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
-                      {parsedRows.slice(0, 50).map((r) => (
+                      {parsedRows.slice(0, 50).map((r, i) => (
                         <tr key={r.id} className={r.isValid ? "" : "bg-red-50/50 dark:bg-red-950/20"}>
-                          <td className="p-2.5 pl-4 font-semibold text-green-950 dark:text-white">
+                          <td className="p-2.5 pl-4 text-gray-400 font-mono">{i + 1}</td>
+                          <td className="p-2.5 font-semibold text-green-950 dark:text-white">
                             {r.name}
                           </td>
-                          <td className="p-2.5 font-mono">+{r.phone}</td>
-                          <td className="p-2.5 text-gray-400">{r.email || "—"}</td>
+                          <td className="p-2.5 font-mono text-[#25D366] font-bold">+{r.phone}</td>
                           <td className="p-2.5">
                             {r.isValid ? (
-                              <span className="text-emerald-600 font-bold">✓ Ready</span>
+                              <span className="text-emerald-600 font-bold">✓ Ready to Import</span>
                             ) : (
                               <span className="text-red-500 font-bold">{r.reason}</span>
                             )}
@@ -715,7 +816,7 @@ export default function CustomersAdminPage() {
               >
                 {isUploading ? (
                   <>
-                    <span className="animate-spin">⏳</span> Processing...
+                    <span className="animate-spin">⏳</span> Processing Excel Data...
                   </>
                 ) : (
                   <>
@@ -747,7 +848,7 @@ export default function CustomersAdminPage() {
             <form onSubmit={handleAddSingle} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 ml-1">
-                  Full Name
+                  Customer Name
                 </label>
                 <input
                   type="text"
@@ -775,19 +876,9 @@ export default function CustomersAdminPage() {
                     className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-sm focus:border-green-500 outline-none text-green-950 dark:text-white font-bold"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1 ml-1">
-                  Email Address (Optional)
-                </label>
-                <input
-                  type="email"
-                  value={singleEmail}
-                  onChange={(e) => setSingleEmail(e.target.value)}
-                  placeholder="ramesh@example.com"
-                  className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-sm focus:border-green-500 outline-none text-green-950 dark:text-white"
-                />
+                <p className="text-[11px] text-gray-400 mt-1 ml-1">
+                  Enter 10-digit mobile number.
+                </p>
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t border-gray-100 dark:border-neutral-800">
