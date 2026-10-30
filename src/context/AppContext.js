@@ -41,20 +41,50 @@ export const AppProvider = ({ children }) => {
       const res = await fetch(`${API_URL}/products`);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setFertilizers(data);
-        } else {
-          setFertilizers(seedProducts);
         }
       } else {
         console.error("Failed to fetch products from backend");
-        // Fallback to local state if backend is down
-        setFertilizers(seedProducts);
       }
     } catch (error) {
       console.error("Error connecting to backend API:", error);
-      // Fallback
-      setFertilizers(seedProducts);
+    }
+  };
+
+  const truncateFertilizers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/products/truncate`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFertilizers([]);
+        return data;
+      } else {
+        throw new Error(data.error || "Failed to truncate products");
+      }
+    } catch (error) {
+      console.error("Error truncating products:", error);
+      throw error;
+    }
+  };
+
+  const seedFertilizers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/products/seed`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await fetchProducts();
+        return data;
+      } else {
+        throw new Error(data.error || "Failed to seed products");
+      }
+    } catch (error) {
+      console.error("Error seeding products:", error);
+      throw error;
     }
   };
 
@@ -158,7 +188,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, editFertilizer, deleteFertilizer, fetchProducts }}>
+    <AppContext.Provider value={{ user, fertilizers, theme, toggleTheme, login, logout, addFertilizer, editFertilizer, deleteFertilizer, fetchProducts, truncateFertilizers, seedFertilizers }}>
       {children}
     </AppContext.Provider>
   );

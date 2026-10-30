@@ -24,6 +24,22 @@ exports.seedProducts = async (req, res) => {
   }
 };
 
+// Truncate / Clear all products
+exports.truncateProducts = async (req, res) => {
+  try {
+    const pool = getPool();
+    await pool.query('TRUNCATE TABLE products');
+    res.status(200).json({ 
+      success: true, 
+      message: 'All product data truncated successfully. The catalog is now empty and ready for bulk upload.',
+      count: 0 
+    });
+  } catch (error) {
+    console.error('Error truncating products:', error);
+    res.status(500).json({ error: 'Failed to truncate products: ' + (error.message || error) });
+  }
+};
+
 // Get all products
 exports.getProducts = async (req, res) => {
   try {

@@ -10,7 +10,7 @@ import * as XLSX from "xlsx";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://agro-fe-production.up.railway.app";
 
 export default function AdminProductsPage() {
-  const { user, fertilizers, deleteFertilizer, fetchProducts } = useAppContext();
+  const { user, fertilizers, deleteFertilizer, fetchProducts, truncateFertilizers, seedFertilizers } = useAppContext();
   const router = useRouter();
 
   // Search and Filter State
@@ -26,6 +26,8 @@ export default function AdminProductsPage() {
   const [parsedRows, setParsedRows] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStats, setUploadStats] = useState(null);
+  const [isTruncating, setIsTruncating] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== "admin") {
@@ -378,6 +380,66 @@ export default function AdminProductsPage() {
     XLSX.writeFile(wb, `products_catalog_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  // Truncate All Products in Database
+  const handleTruncateAll = async () => {
+    if (
+      !confirm(
+        `⚠️ DANGER: Are you sure you want to TRUNCATE and CLEAR all ${fertilizers.length} products from the database?\n\nThis will completely empty your product catalog so you can upload your custom Excel file cleanly.\n\nClick OK to proceed with clearing all products.`
+      )
+    ) {
+      return;
+    }
+
+    setIsTruncating(true);
+    try {
+      if (typeof truncateFertilizers === "function") {
+        await truncateFertilizers();
+      } else {
+        const res = await fetch(`${API_BASE}/api/products/truncate`, { method: "POST" });
+        if (!res.ok) throw new Error("Failed to truncate products");
+        if (typeof fetchProducts === "function") await fetchProducts();
+      }
+      alert("✅ Product catalog truncated successfully! The catalog is now empty. Select your Excel file (.xlsx) to bulk upload your new products.");
+      setParsedRows([]);
+      setFileName("");
+      setUploadStats(null);
+      setShowBulkModal(true);
+    } catch (err) {
+      console.error("Truncate error:", err);
+      alert("Failed to truncate products: " + (err.message || err));
+    } finally {
+      setIsTruncating(false);
+    }
+  };
+
+  // Re-seed Default Products
+  const handleSeedDefaults = async () => {
+    if (
+      !confirm(
+        "Do you want to re-seed the default 147 agricultural products from seed.sql into your database?"
+      )
+    ) {
+      return;
+    }
+
+    setIsSeeding(true);
+    try {
+      if (typeof seedFertilizers === "function") {
+        await seedFertilizers();
+      } else {
+        const res = await fetch(`${API_BASE}/api/products/seed`, { method: "POST" });
+        if (!res.ok) throw new Error("Failed to seed products");
+        if (typeof fetchProducts === "function") await fetchProducts();
+      }
+      alert("✅ Default 147 agricultural products seeded successfully into your catalog!");
+    } catch (err) {
+      console.error("Seed error:", err);
+      alert("Failed to seed default products: " + (err.message || err));
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   if (!user || user.role !== "admin") return null;
 
   return (
@@ -525,6 +587,24 @@ export default function AdminProductsPage() {
             >
               <span>📊</span> Export to Excel (.xlsx)
             </button>
+
+            <button
+              onClick={handleTruncateAll}
+              disabled={isTruncating || fertilizers.length === 0}
+              className="text-xs font-bold px-4 py-3 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 transition-colors flex items-center gap-1.5 border border-red-200 dark:border-red-800 disabled:opacity-40"
+              title="Clear all products from database"
+            >
+              <span>🗑️</span> {isTruncating ? "Truncating..." : "Truncate All Products"}
+            </button>
+
+            <button
+              onClick={handleSeedDefaults}
+              disabled={isSeeding}
+              className="text-xs font-bold px-4 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 transition-colors flex items-center gap-1.5 border border-blue-200 dark:border-blue-800 disabled:opacity-40"
+              title="Reset and re-seed default 147 products from seed.sql"
+            >
+              <span>🌱</span> {isSeeding ? "Seeding..." : "Re-Seed Defaults"}
+            </button>
           </div>
         </div>
 
@@ -548,15 +628,39 @@ export default function AdminProductsPage() {
         {/* Catalog Content (Grid or Table) */}
         {filteredProducts.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
-            <div className="text-4xl mb-2">📦</div>
-            <div className="font-bold text-base text-gray-700 dark:text-gray-300">
-              {search || selectedCategory !== "ALL"
+            <div className="text-5xl mb-3">📦</div>
+            <div className="font-extrabold text-xl text-green-950 dark:text-white">
+              {fertilizers.length === 0
+                ? "Product Catalog is Empty & Ready for Bulk Upload!"
+                : search || selectedCategory !== "ALL"
                 ? "No matching products found"
                 : "No products in inventory yet"}
             </div>
-            <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
-              Use the <strong>Bulk Upload</strong> button above to import your product catalog from an Excel file (.xlsx).
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
+              {fertilizers.length === 0
+                ? "The database has been truncated. Click the Bulk Upload button below to import your custom Excel spreadsheet."
+                : "Use the Bulk Upload button above to import your product catalog from an Excel file (.xlsx)."}
             </p>
+            <div className="flex justify-center gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowBulkModal(true);
+                  setUploadStats(null);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-2xl shadow-lg transition flex items-center gap-2 text-sm"
+              >
+                <span>📊</span> Bulk Upload Excel File
+              </button>
+              {fertilizers.length === 0 && (
+                <button
+                  onClick={handleSeedDefaults}
+                  disabled={isSeeding}
+                  className="bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 font-bold px-6 py-3 rounded-2xl transition text-sm flex items-center gap-2"
+                >
+                  <span>🌱</span> Restore 147 Default Products
+                </button>
+              )}
+            </div>
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -657,6 +761,27 @@ export default function AdminProductsPage() {
                 className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 font-bold flex items-center justify-center"
               >
                 ✕
+              </button>
+            </div>
+
+            {/* Quick Truncate Banner inside Bulk Upload Modal */}
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div className="text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                <span className="text-2xl">⚠️</span>
+                <div>
+                  <div className="font-extrabold text-sm">Want a clean slate before uploading?</div>
+                  <div className="text-gray-600 dark:text-gray-400 text-xs">
+                    You currently have <strong>{fertilizers.length}</strong> products in database. Truncating will clear all existing items so only your fresh Excel file is stored.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={isTruncating || fertilizers.length === 0}
+                onClick={handleTruncateAll}
+                className="bg-red-600 hover:bg-red-500 disabled:opacity-40 text-white font-extrabold px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 whitespace-nowrap text-xs"
+              >
+                {isTruncating ? "Truncating..." : "🗑️ Truncate All Products First"}
               </button>
             </div>
 
