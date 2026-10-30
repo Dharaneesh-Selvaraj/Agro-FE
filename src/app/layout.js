@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
 import Splash from "@/components/Splash";
+import Footer from "@/components/Footer";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${outfit.variable} ${geistMono.variable} antialiased font-sans bg-green-50 dark:bg-green-950`}
+        className={`${outfit.variable} ${geistMono.variable} antialiased font-sans bg-green-50 dark:bg-green-950 flex flex-col min-h-screen`}
       >
         <AppProvider>
           {/* Global Background Animated Blobs for Glassmorphism Effect */}
@@ -35,9 +36,10 @@ export default function RootLayout({ children }) {
           
           <Splash />
           <Navbar />
-          <main className="min-h-screen relative z-0">
+          <main className="flex-1 relative z-0">
             {children}
           </main>
+          <Footer />
         </AppProvider>
       </body>
     </html>

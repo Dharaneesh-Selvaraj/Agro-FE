@@ -17,7 +17,7 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col">
       {/* Ultra-Modern Hero Section */}
       <section className="relative w-full min-h-[75vh] flex items-center justify-center overflow-hidden rounded-b-[4rem] mx-auto max-w-[98%] shadow-2xl mb-16 bg-green-950">
         <div 
@@ -97,12 +97,6 @@ export default function Home() {
           </p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-green-200 dark:bg-green-950 text-green-800 dark:text-green-50/50 py-12 text-center mt-auto rounded-t-[4rem] transition-colors duration-500">
-        <h2 className="text-2xl font-bold text-green-950 dark:text-green-50 mb-4 tracking-tighter transition-colors duration-500">Sri Venkateswara Traders</h2>
-        <p suppressHydrationWarning className="text-sm">© {new Date().getFullYear()} All rights reserved. The Core of Coconut.</p>
-      </footer>
     </div>
   );
 }
